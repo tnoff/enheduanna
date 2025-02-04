@@ -2,17 +2,29 @@
 
 Note taking command line tool for keeping daily, weekly, and quarterly notes.
 
+## Install
+
+Install via pip
+
+```
+$ git clone https://github.com/tnoff/enheduanna.git
+$ pip install enheduanna/
+```
+
 ## Config File
 
 The config is a YAML config that allows for environment variable options through [pyaml-env](https://github.com/mkaranasou/pyaml_env).
+By default the cli will look for the config file at `~/.enheduanna.yml`, and this can be overriden with the cli `-c` option.
 
-Allow options are as follows
+For example, to override the `date_format` and `note_folder` options:
 
 ```
 ---
 date_format: '%Y-%m-%d' # Datetime format used in folders and files
 note_folder: '/home/user/Notes' # Default folder for notes
 ```
+
+Note that some options, such as `sections` can only be overriden via the config, but others can be set by the cli.
 
 ## Folder Format
 

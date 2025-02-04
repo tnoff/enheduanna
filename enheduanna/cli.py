@@ -11,7 +11,7 @@ DATE_FORMAT_DEFAULT = '%Y-%m-%d'
 SECTIONS_DEFAULT = [
     {
         'title': 'Work Done',
-        'contents': '',
+        'contents': '- ',
     },
     {
         'title': 'Meetings',
@@ -19,7 +19,7 @@ SECTIONS_DEFAULT = [
     },
     {
         'title': 'Follow Ups',
-        'contents': '',
+        'contents': '- ',
     },
     {
         'title': 'Scratch',
@@ -118,6 +118,9 @@ def main(context: click.Context, config_file: Path, note_folder: Path, date_form
 @main.command('ready-file')
 @click.pass_context
 def ready_file(context: click.Context):
+    '''
+    Ready the daily note file
+    '''
     # Get date basics
     today = date.today()
     start = get_start_of_week(today)

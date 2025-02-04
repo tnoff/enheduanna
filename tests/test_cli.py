@@ -50,7 +50,7 @@ def test_ensure_daily_file():
         result = ensure_daily_file(Path(tmpdir), today, '%Y-%m-%d', SECTIONS_DEFAULT)
         assert str(result) == f'{tmpdir}/2025-02-02.md'
         result_contents = Path(result).read_text()
-        assert result_contents == '# 2025-02-02\n\n## Work Done\n\n## Meetings\n| Time | Meeting Name |\n| ---- | ------------ |\n| | |\n\n## Follow Ups\n\n## Scratch\n'
+        assert result_contents == '# 2025-02-02\n\n## Work Done\n- \n## Meetings\n| Time | Meeting Name |\n| ---- | ------------ |\n| | |\n\n## Follow Ups\n- \n## Scratch\n'
 
 @freeze_time('2024-12-01 12:00:00', tz_offset=0)
 def test_ready_file_cli():
