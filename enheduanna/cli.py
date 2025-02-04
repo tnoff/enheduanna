@@ -11,7 +11,7 @@ DATE_FORMAT_DEFAULT = '%Y-%m-%d'
 SECTIONS_DEFAULT = [
     {
         'title': 'Work Done',
-        'contents': '',
+        'contents': '- ',
     },
     {
         'title': 'Meetings',
@@ -19,7 +19,7 @@ SECTIONS_DEFAULT = [
     },
     {
         'title': 'Follow Ups',
-        'contents': '',
+        'contents': '- ',
     },
     {
         'title': 'Scratch',
@@ -54,7 +54,7 @@ def get_config_options(config: dict, note_folder: Path, date_format: str) -> dic
     date_format : Date format cli override
     '''
     if note_folder is not None:
-        config['note_folder'] = note_folder
+        config['note_folder'] = Path(note_folder)
     else:
         config['note_folder'] = Path(config.get('note_folder', FOLDER_DEFAULT))
 
@@ -95,13 +95,14 @@ def ensure_daily_file(weekly_folder: Path, today: date, date_format: str, sectio
     day_file.write_text(text_contents)
     return day_file
 
-@click.command()
+@click.group()
 @click.option('-c', '--config-file', default=CONFIG_DEFAULT, show_default=True,
               type=click.Path(file_okay=True, dir_okay=False, exists=False))
 @click.option('-n', '--note-folder',
               type=click.Path(file_okay=False, dir_okay=True, exists=False))
 @click.option('-df', '--date-format')
-def main(config_file: Path, note_folder: Path, date_format: str):
+@click.pass_context
+def main(context: click.Context, config_file: Path, note_folder: Path, date_format: str):
     '''
     Main cli runner
     '''
@@ -110,15 +111,24 @@ def main(config_file: Path, note_folder: Path, date_format: str):
     if config_file.exists():
         config = parse_config(str(config_file))
     config = get_config_options(config, note_folder, date_format)
+    context.obj = {
+        'config': config,
+    }
 
+@main.command('ready-file')
+@click.pass_context
+def ready_file(context: click.Context):
+    '''
+    Ready the daily note file
+    '''
     # Get date basics
     today = date.today()
     start = get_start_of_week(today)
     end = get_end_of_week(today)
     # Get folder and file ready
-    weekly_folder = create_weekly_folder(config['note_folder'], start, end, config['date_format'])
-    day_file = ensure_daily_file(weekly_folder, today, config['date_format'], config['sections'])
+    weekly_folder = create_weekly_folder(context.obj['config']['note_folder'], start, end, context.obj['config']['date_format'])
+    day_file = ensure_daily_file(weekly_folder, today, context.obj['config']['date_format'], context.obj['config']['sections'])
     click.echo(f'Created note file {day_file}')
 
 if __name__ == '__main__':
-    main() # pylint:disable=no-value-for-parameter
+    main(obj={}) # pylint:disable=no-value-for-parameter
