@@ -1,14 +1,16 @@
 from datetime import date
 from tempfile import TemporaryDirectory
 
+from click.testing import CliRunner
+from freezegun import freeze_time
 from pathlib import Path
-
 
 from enheduanna.cli import FOLDER_DEFAULT, DATE_FORMAT_DEFAULT, SECTIONS_DEFAULT
 from enheduanna.cli import get_start_of_week, get_end_of_week
 from enheduanna.cli import get_config_options
 from enheduanna.cli import create_weekly_folder
 from enheduanna.cli import ensure_daily_file
+from enheduanna.cli import main
 
 def test_week_functions():
     today = date(2025, 2, 2)
@@ -49,3 +51,17 @@ def test_ensure_daily_file():
         assert str(result) == f'{tmpdir}/2025-02-02.md'
         result_contents = Path(result).read_text()
         assert result_contents == '# 2025-02-02\n\n## Work Done\n\n## Meetings\n| Time | Meeting Name |\n| ---- | ------------ |\n| | |\n\n## Follow Ups\n\n## Scratch\n'
+
+@freeze_time('2024-12-01 12:00:00', tz_offset=0)
+def test_ready_file_cli():
+    with TemporaryDirectory() as tmpdir:
+        runner = CliRunner()
+        result = runner.invoke(main, ['-n', tmpdir, 'ready-file'])
+        assert result.output == f'Created note file {tmpdir}/2024-11-25_2024-12-01/2024-12-01.md\n'
+
+@freeze_time('2024-12-01 12:00:00', tz_offset=0)
+def test_ready_file_cli_override_date_format():
+    with TemporaryDirectory() as tmpdir:
+        runner = CliRunner()
+        result = runner.invoke(main, ['-n', tmpdir, '-df', '%d-%m-%Y', 'ready-file'])
+        assert result.output == f'Created note file {tmpdir}/25-11-2024_01-12-2024/01-12-2024.md\n'
