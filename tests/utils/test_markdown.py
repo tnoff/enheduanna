@@ -30,7 +30,6 @@ def test_validation_of_rollup_schema():
     valid = rollup_section_generate_from_json([{"title": "foo"}])
     assert valid[0].title == "foo"
 
-
 def test_generate_markdown_sections():
     input_text = '''# 2025-01-01
 
