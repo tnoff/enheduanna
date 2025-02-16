@@ -79,7 +79,8 @@ def test_ensure_daily_file():
         result = ensure_daily_file(Path(tmpdir), today, '%Y-%m-%d', section_generate_from_json(SECTIONS_DEFAULT))
         assert str(result) == f'{tmpdir}/2025-02-02.md'
         result_contents = Path(result).read_text()
-        assert result_contents == '# 2025-02-02\n\n## Work Done\n\n- \n\n## Meetings\n\n| Time | Meeting Name |\n| ---- | ------------ |\n| | |\n\n## Follow Ups\n\n- \n\n## Scratch\n\n'
+        print(result_contents)
+        assert result_contents == '# 2025-02-02\n\n## Work Done\n\n- \n\n## Meetings\n\n| Time | Meeting Name |\n| ---- | ------------ |\n| | |\n\n## Follow Ups\n\n- \n\n## Scratch\n'
 
 @freeze_time('2024-12-01 12:00:00', tz_offset=0)
 def test_ready_file_cli():
@@ -125,13 +126,18 @@ This wont show up in the rollup
 '''
 
     with TemporaryDirectory() as tmpdir:
+        dir_path = Path(tmpdir) / '2025-02-10_2025-02-16'
+        dir_path.mkdir()
         runner = CliRunner()
-        with NamedTemporaryFile(prefix=tmpdir) as file1:
+        with NamedTemporaryFile(dir=dir_path, prefix='abc', suffix='.md') as file1:
             path1 = Path(file1.name)
             path1.write_text(file1_text)
-            with NamedTemporaryFile(prefix=tmpdir) as file2:
+            with NamedTemporaryFile(dir=dir_path, prefix='xyz', suffix='.md') as file2:
                 path2 = Path(file2.name)
                 path2.write_text(file2_text)
-                runner.invoke(main, ['-n', tmpdir, 'rollup', tmpdir])
-                expected_path = Path(tmpdir) / 'summary.md'
+                runner.invoke(main, ['-n', tmpdir, 'rollup', str(dir_path)])
+                expected_path = dir_path / 'summary.md'
                 assert expected_path.exists()
+                text = expected_path.read_text()
+                assert text == f'# Summary | 2025-02-10 -> 2025-02-16\n\n## Work Done\n\n- I did this ticket today (XYZ-234)\n- Another update on that ticket (XYZ-234)\n\n- Another random ticket I did (ASF-123)\n\n- Some random task\n\n## Follow Ups\n\n- Random follow up for today\n- Dont forget to do this other thing\n'
+

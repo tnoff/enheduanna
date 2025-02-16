@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 from pathlib import Path
 from typing import List
 
@@ -12,9 +12,7 @@ from enheduanna.utils.days import get_end_of_week, get_start_of_week
 from enheduanna.utils.files import list_markdown_files
 from enheduanna.utils.markdown import section_generate_from_json
 from enheduanna.utils.markdown import rollup_section_generate_from_json
-from enheduanna.utils.markdown import generate_markdown_sections
 from enheduanna.utils.markdown import combine_markdown_sections
-from enheduanna.utils.markdown import markdown_section_output
 
 class ConfigException(Exception):
     '''
@@ -28,17 +26,17 @@ DATE_FORMAT_DEFAULT = '%Y-%m-%d'
 SECTIONS_DEFAULT = [
     {
         'title': 'Work Done',
-        'contents': '\n- ',
+        'contents': '- ',
         'level': 2,
     },
     {
         'title': 'Meetings',
-        'contents': '\n| Time | Meeting Name |\n| ---- | ------------ |\n| | |',
+        'contents': '| Time | Meeting Name |\n| ---- | ------------ |\n| | |',
         'level': 2,
     },
     {
         'title': 'Follow Ups',
-        'contents': '\n- ',
+        'contents': '- ',
         'level': 2,
     },
     {
@@ -109,10 +107,10 @@ def ensure_daily_file(weekly_folder: Path, today: date, date_format: str, sectio
     day_file = weekly_folder / f'{today.strftime(date_format)}.md'
     if day_file.exists():
         return day_file
-    text_contents = f'# {today.strftime(date_format)}\n'
+    markdown_contents = MarkdownSection(today.strftime(date_format), '')
     for section in sections:
-        text_contents += f'\n## {section.title}\n{section.contents}\n'
-    day_file.write_text(text_contents)
+        markdown_contents.add_section(section)
+    day_file.write_text(markdown_contents.write())
     return day_file
 
 @click.group()
@@ -160,17 +158,18 @@ def rollup(context: click.Context, file_dir: str, title, rollup_name: str):
     Rollup daily note files
     '''
     file_dir = Path(file_dir)
+    print('file_dir', file_dir)
     title = title or f'Summary | {file_dir.name.replace("_", " -> ")}'
     markdown_sections = []
     for path in list_markdown_files(file_dir):
-        markdown_sections.append(generate_markdown_sections(path.read_text()))
+        markdown_sections.append(MarkdownSection.from_text(path.read_text()))
     combos = combine_markdown_sections(markdown_sections, context.obj['config']['rollup_sections'])
     new_document = MarkdownSection(title, '')
     for section in combos:
         section.level = 2
         new_document.add_section(section)
     new_path = file_dir / rollup_name
-    new_path.write_text(markdown_section_output(new_document))
+    new_path.write_text(new_document.write())
     click.echo(f'Rollup data written to file {new_path}')
 
 if __name__ == '__main__':
