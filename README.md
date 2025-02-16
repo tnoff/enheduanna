@@ -1,8 +1,8 @@
 # Enheduanna
 
-Note taking command line tool for keeping daily notes. Has tools to rollup daily notes into summaries, grouping different sections together.
+Command line tool for creating daily note Markdown files. Organizes the daily note files into weekly directories, and has functions for "Rolling Up" the notes into weekly summaries.
 
-Config values allow you to customize default sections within the markdown file.
+Useful for staying on top of current projects, follow up items, and how many meetings you've had in a given week. Also useful for keeping track of work you've done in the past for yearly self-reviews and rsume updating.
 
 ## Install
 
@@ -15,11 +15,12 @@ $ pip install enheduanna/
 
 ## Basic Usage
 
-Use the cli to create daily note files in markdown and other actiosn such as rolling up a weeks worth of notes into a summary.
+Basic cli usage.
 
 ## Daily Note File
 
-Run the `enheduanna ready-file` command to create a markdown file for todays notes. This will create the file within a directory named for the current week. You can decide which root "Note Folder" all of these files and dirs are placed into via the config, its nothing is set it will default to the `~/Notes` directory.
+The `ready-file` command wll create a markdown file for todays notes. The note file will be named for the current day, such as `2025-01-21.md`. The file will be placed in a directory named for the current week. 
+
 
 The format will look like this:
 
@@ -28,9 +29,11 @@ Notes/
   2025-01-20_2025-01_26/
     2025-01-20.md
     2025-01-21.md
-  2025-01-27_2025-02-02/
-    2025-02-02.md
+    2025-01-22.md
+    2025-01-23.md
 ```
+
+The date format used in the file names can be overriden, as well as the note folder location.
 
 Each file will have default sections given, with a title of todays date:
 
@@ -58,35 +61,54 @@ These sections can be overriden via the config.
 
 ### Rollups
 
-Combine a weeks worth of note files into a single `summary.md` file in the same directory using the `enheduanna rollup [directory]` command. The name of the rollup file can be specified via the `-rn` cli option.
+Use the `rollup` command against a weekly note directory to roll up all of the daily note files in that directory into a `summary.md` file in that same directory.
 
-Specific "Rollup Sections" are defined to know which Markdown Sections to include in the rollup file. By default the "Work Done" and "Follow Ups" sections are included, but these can be overriden via the config.
+By default the `Work Done` and `Follow Ups` sections will be combined together and placed into the new `summary.md` file.
 
-For every section you can add in a `regex` and `groupBy` option to have the rollup command group contents. By default, the "Work Done" section groups content lines that have the same "ticket pattern" that matches the `([a-zA-Z]+-[0-9]+)` regex.
+The contents of the rolled up sections can also be grouped together to make it easier to edit later, by default the `Work Done` section is grouped together by a regex which looks for jira ticket numbers within parenthesis, such as `(ABC-1234)`.
 
-For example if you had these lines in different note files
+If no regex grouping options are given, the contents will be placed into the rolled up sections in the order they are read.
 
-File1
+
+For example if you had these lines in different note files:
+
+2025-01-20.md
 ```
 ## Work Done
 
 - Working on some ticket (ABC-1234)
+- Fixing that one bug thats been bugging me forever (XYZ-2345)
+
+## Follow Ups
+
+- Message back my boss about that customer commit
 ```
 
-File2
+2025-01-21.md
 ```
 ## Work Done
 
 - Working on that same ticket, had more issues (ABC-1234)
+
+## Follow Ups
+
+- Watch that training video
 ```
 
-In the rollup file, the cli will group these lines together
+After running the `rollup` command, the `summary.md` file will include:
 
+summary.md
 ```
 ## Work Done
 
 - Working on some ticket (ABC-1234)
 - Working on that same ticket, had more issues (ABC-1234)
+- Fixing that one bug thats been bugging me forever (XYZ-2345)
+
+## Follow Ups
+
+- Message back my boss about that customer commit
+- Watch that training video
 ```
 
 ## Config File
