@@ -8,6 +8,8 @@ from pydantic import ValidationError
 
 from enheduanna.types.markdown_section import MarkdownSection
 
+from enheduanna.utils.days import get_end_of_week, get_start_of_week
+from enheduanna.utils.files import list_markdown_files
 from enheduanna.utils.markdown import section_generate_from_json
 from enheduanna.utils.markdown import rollup_section_generate_from_json
 from enheduanna.utils.markdown import generate_markdown_sections
@@ -56,24 +58,6 @@ ROLLUP_SECTIONS_DEFAULT = [
         'title': 'Follow Ups',
     }
 ]
-
-def get_start_of_week(day: date) -> date:
-    '''
-    Get start of week
-    '''
-    while True:
-        if day.weekday() == 0:
-            return day
-        day = day - timedelta(days=1)
-
-def get_end_of_week(day: date) -> date:
-    '''
-    Get end of week
-    '''
-    while True:
-        if day.weekday() == 6:
-            return day
-        day = day + timedelta(days=1)
 
 def get_config_options(config: dict, note_folder: str, date_format: str) -> dict:
     '''
@@ -178,7 +162,7 @@ def rollup(context: click.Context, file_dir: str, title, rollup_name: str):
     file_dir = Path(file_dir)
     title = title or f'Summary | {file_dir.name.replace("_", " -> ")}'
     markdown_sections = []
-    for path in file_dir.rglob('*.md'):
+    for path in list_markdown_files(file_dir):
         markdown_sections.append(generate_markdown_sections(path.read_text()))
     combos = combine_markdown_sections(markdown_sections, context.obj['config']['rollup_sections'])
     new_document = MarkdownSection(title, '')
