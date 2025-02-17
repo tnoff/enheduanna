@@ -1,4 +1,20 @@
-from enheduanna.types.markdown_section import MarkdownSection
+from pytest import raises
+
+from enheduanna.types.markdown_section import MarkdownSection, MarkdownException
+
+def test_markdown_invalid_section():
+    m = MarkdownSection('2025-02-16', 'generic contents')
+    m.add_section(MarkdownSection('Sub-Section', '- Some generic contents in list', level=2))
+    with raises(MarkdownException) as e:
+        m.add_section(MarkdownSection('Sub-Section', '', level=2))
+    assert 'Cannot add section, a section with title "Sub-Section" already exists' in str(e.value)
+
+def test_markdown_section_remove():
+    m = MarkdownSection('2025-02-16', 'generic contents')
+    m.add_section(MarkdownSection('Sub-Section', '- Some generic contents in list', level=2))
+    s = m.remove_section('Sub-Section')
+    assert s.contents == '- Some generic contents in list'
+    assert m.remove_section('foo') == None
 
 def test_markdown_write():
     m = MarkdownSection('2025-02-16', 'generic contents')
