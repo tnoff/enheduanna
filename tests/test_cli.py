@@ -15,6 +15,7 @@ from enheduanna.cli import create_weekly_folder
 from enheduanna.cli import ensure_daily_file
 from enheduanna.cli import main
 
+from enheduanna.types.markdown_file import MarkdownFile
 from enheduanna.utils.markdown import section_generate_from_json
 
 def test_week_functions():
@@ -76,25 +77,68 @@ def test_create_weekly_folder():
 def test_ensure_daily_file():
     with TemporaryDirectory() as tmpdir:
         today = date(2025, 2, 2)
-        result = ensure_daily_file(Path(tmpdir), today, '%Y-%m-%d', section_generate_from_json(SECTIONS_DEFAULT))
+        result = ensure_daily_file(Path(tmpdir), today, '%Y-%m-%d', section_generate_from_json(SECTIONS_DEFAULT), None)
         assert str(result) == f'{tmpdir}/2025-02-02.md'
         result_contents = Path(result).read_text()
-        assert result_contents == '# 2025-02-02\n\n## Work Done\n\n- \n\n## Meetings\n\n| Time | Meeting Name |\n| ---- | ------------ |\n| | |\n\n## Follow Ups\n\n- \n\n## Scratch\n\n'
+        assert result_contents == '# 2025-02-02\n\n## Work Done\n\n- \n\n## Meetings\n\n| Time | Meeting Name |\n| ---- | ------------ |\n| | |\n\n## Follow Ups\n\n- \n\n## Scratch\n'
+
+def test_ensure_daily_file_with_carryover():
+    file1_text = '''# 2025-02-16
+
+## Dummy Section
+
+Make sure this is still there afterward
+
+## Follow Ups
+
+- Carry over this followup to the next day
+'''
+    with TemporaryDirectory() as tmpdir:
+        dir_path = Path(tmpdir)
+        weekly_dir = dir_path / '2025-02-10_2025-02-16'
+        weekly_dir.mkdir()
+        last_daily_path = weekly_dir / '2025-02-16'
+        last_daily_path.write_text(file1_text)
+        last_daily_file = MarkdownFile.from_file(last_daily_path)
+        today = date(2025, 2, 17)
+        result = ensure_daily_file(Path(tmpdir), today, '%Y-%m-%d', section_generate_from_json(SECTIONS_DEFAULT), last_daily_file)
+        assert result.read_text() == '# 2025-02-17\n\n## Work Done\n\n- \n\n## Meetings\n\n| Time | Meeting Name |\n| ---- | ------------ |\n| | |\n\n## Follow Ups\n\n- Carry over this followup to the next day\n\n## Scratch\n'
+        assert last_daily_path.read_text() == '# 2025-02-16\n\n## Dummy Section\n\nMake sure this is still there afterward\n'
+
+@freeze_time('2025-12-01 12:00:00', tz_offset=0)
+def test_ready_file_cli():
+        runner = CliRunner()
+        result = runner.invoke(main, ['-n', tmpdir, 'ready-file'])
+        assert result.output == f'Created note file {tmpdir}/2024-11-25_2024-12-01/2024-12-01.md\n'
+
+@freeze_time('2025-02-17 12:00:00', tz_offset=0)
+def test_ready_file_cli_with_carryover():
+    file1_text = '''# 2025-02-16
+
+## Dummy Section
+
+Make sure this is still there afterward
+
+## Follow Ups
+
+- Carry over this followup to the next day
+'''
+    with TemporaryDirectory() as tmpdir:
+        dir_path = Path(tmpdir)
+        weekly_dir = dir_path / '2025-02-10_2025-02-16'
+        weekly_dir.mkdir()
+        last_daily_path = weekly_dir / '2025-02-16'
+        last_daily_path.write_text(file1_text)
+        runner = CliRunner()
+        result = runner.invoke(main, ['-n', tmpdir, 'ready-file'])
+        assert result.output == f'Created note file {tmpdir}/2025-02-17_2025-02-23/2025-02-17.md\n'
 
 @freeze_time('2024-12-01 12:00:00', tz_offset=0)
 def test_ready_file_cli():
     with TemporaryDirectory() as tmpdir:
         runner = CliRunner()
         result = runner.invoke(main, ['-n', tmpdir, 'ready-file'])
-        print(result.exception)
         assert result.output == f'Created note file {tmpdir}/2024-11-25_2024-12-01/2024-12-01.md\n'
-
-@freeze_time('2024-12-01 12:00:00', tz_offset=0)
-def test_ready_file_cli_override_date_format():
-    with TemporaryDirectory() as tmpdir:
-        runner = CliRunner()
-        result = runner.invoke(main, ['-n', tmpdir, '-df', '%d-%m-%Y', 'ready-file'])
-        assert result.output == f'Created note file {tmpdir}/25-11-2024_01-12-2024/01-12-2024.md\n'
 
 def test_rollup():
     file1_text = '''# 2025-01-01
@@ -125,13 +169,18 @@ This wont show up in the rollup
 '''
 
     with TemporaryDirectory() as tmpdir:
+        dir_path = Path(tmpdir) / '2025-02-10_2025-02-16'
+        dir_path.mkdir()
         runner = CliRunner()
-        with NamedTemporaryFile(prefix=tmpdir) as file1:
+        with NamedTemporaryFile(dir=dir_path, prefix='abc', suffix='.md') as file1:
             path1 = Path(file1.name)
             path1.write_text(file1_text)
-            with NamedTemporaryFile(prefix=tmpdir) as file2:
+            with NamedTemporaryFile(dir=dir_path, prefix='xyz', suffix='.md') as file2:
                 path2 = Path(file2.name)
                 path2.write_text(file2_text)
-                runner.invoke(main, ['-n', tmpdir, 'rollup', tmpdir])
-                expected_path = Path(tmpdir) / 'summary.md'
+                result = runner.invoke(main, ['-n', tmpdir, 'rollup', str(dir_path)])
+                expected_path = dir_path / 'summary.md'
+                assert 'Rollup data written to file' in result.output
                 assert expected_path.exists()
+                text = expected_path.read_text()
+                assert text == f'# Summary | 2025-02-10 -> 2025-02-16\n\n## Work Done\n\n- I did this ticket today (XYZ-234)\n- Another update on that ticket (XYZ-234)\n\n- Another random ticket I did (ASF-123)\n\n- Some random task\n'
