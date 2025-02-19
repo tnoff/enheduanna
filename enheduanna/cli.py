@@ -3,6 +3,10 @@ from pathlib import Path
 from typing import List
 
 import click
+from jira import JIRA
+from jira.exceptions import JIRAError
+from jsonschema import ValidationError as jsonValidationError
+from jsonschema import validate
 from pyaml_env import parse_config
 from pydantic import ValidationError
 
@@ -14,6 +18,22 @@ from enheduanna.utils.files import list_markdown_files, find_last_markdown_file
 from enheduanna.utils.markdown import section_generate_from_json
 from enheduanna.utils.markdown import rollup_section_generate_from_json
 from enheduanna.utils.markdown import generate_markdown_rollup
+
+JIRA_SCHEMA = {
+    'type': 'object',
+    'properties': {
+        'url': {
+            'type': 'string',
+        },
+        'email': {
+            'type': 'string',
+        },
+        'token': {
+            'type': 'string',
+        }
+    },
+    'required': ['url', 'email', 'token'],
+}
 
 class ConfigException(Exception):
     '''
@@ -75,6 +95,20 @@ def get_config_options(config: dict) -> dict:
         config['rollup_sections'] = rollup_section_generate_from_json(config.get('rollup_sections', ROLLUP_SECTIONS_DEFAULT))
     except ValidationError as e:
         raise ConfigException('Invalid rollup sections given') from e
+    jira_config = config.get('jira', {}).get('config', {})
+    if jira_config:
+        try:
+            validate(jira_config, JIRA_SCHEMA)
+        except jsonValidationError as e:
+            raise ConfigException('Invalid jira config given') from e
+        config['jira_client'] = JIRA(server=jira_config['url'],
+                                     basic_auth=(jira_config['email'], jira_config['token']))
+        # Run a command against jira to check auth
+        try:
+            config['jira_client'].current_user()
+        except JIRAError as e:
+            raise ConfigException('Unable to load jira client') from e
+    
     return config
 
 def create_weekly_folder(note_folder: Path, start: date, end: date, date_format: str) -> Path:
@@ -134,7 +168,14 @@ def main(context: click.Context, config_file: str):
         'config': config,
     }
 
-@main.command('ready-file')
+@main.group('file')
+@click.pass_context
+def file(context: click.Context):
+    '''
+    File commands
+    '''
+
+@file.command('ready')
 @click.pass_context
 def ready_file(context: click.Context):
     '''
@@ -153,7 +194,7 @@ def ready_file(context: click.Context):
     day_file = ensure_daily_file(weekly_folder, today, context.obj['config']['date_format'], context.obj['config']['sections'], last_file)
     click.echo(f'Created note file {day_file}')
 
-@main.command('rollup')
+@file.command('rollup')
 @click.option('-rn', '--rollup-name', default='summary.md', show_default=True)
 @click.option('-t', '--title')
 @click.argument('file_dir', type=click.Path(file_okay=False, dir_okay=True, exists=True))

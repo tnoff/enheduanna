@@ -18,6 +18,13 @@ from enheduanna.cli import main
 from enheduanna.types.markdown_file import MarkdownFile
 from enheduanna.utils.markdown import section_generate_from_json
 
+class MockJiraClass():
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def current_user(self):
+        return True
+
 def test_week_functions():
     today = date(2025, 2, 2)
     assert get_start_of_week(today) == date(2025, 1, 27)
@@ -58,6 +65,26 @@ def test_validation_rollup_sections():
             'rollup_sections': 'foo'
         })
     assert 'Invalid rollup sections given' in str(e.value)
+
+def test_jira_validation():
+    with raises(ConfigException) as e:
+        get_config_options({
+            'jira': {'config' : 'foo' },
+        }, None, None)
+    assert 'Invalid jira config given' in str(e.value)
+
+def test_jira_valid_config(mocker):
+    mocker.patch('enheduanna.cli.JIRA', side_effect=MockJiraClass)
+    config = get_config_options({
+        'jira': {
+            'config' : {
+                'url': 'https://example.com',
+                'email': 'user@company.com',
+                'token': 'foo-example-token',
+            }
+        }
+    }, None, None)
+    assert config['jira_client']
 
 def test_create_weekly_folder():
     with TemporaryDirectory() as tmpdir:
