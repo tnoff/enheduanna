@@ -149,6 +149,36 @@ summary.md
 - Fixing that one bug thats been bugging me forever (XYZ-2345)
 ```
 
+### Document Rollup
+
+Additionally set a "Document" directory to pull out write ups you've placed in the daily notes. The idea here is that one-off sections that are not part of the normal section process can be removed and moved to the Document section, as a way of protyping documentation bits such as runbooks. By default the new documents will be placed in the `~/Documents` directory.
+
+For example if you have the following daily file:
+
+2025-01-20.md
+```
+## Work Done
+
+- Working on some ticket (ABC-1234)
+- Fixing that one bug thats been bugging me forever (XYZ-2345)
+
+## Steps to Reboot Servers
+
+Run these commands
+ssh ubuntu@foo.com
+sudo reboot
+```
+
+The rollup command will create a new file named `2025-01-20 Steps to Reboot Servers.md` in the Document directory with the following contents:
+
+```
+## 2025-01-20 Steps to Reboot Servers
+
+Run these commands
+ssh ubuntu@foo.com
+sudo reboot
+```
+
 ## Config File
 
 The config is a YAML config that allows for environment variable options through [pyaml-env](https://github.com/mkaranasou/pyaml_env).

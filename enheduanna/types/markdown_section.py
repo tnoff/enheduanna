@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Self, Union
 
 from pydantic import Field
@@ -48,6 +49,27 @@ class MarkdownSection:
         if index is None:
             return None
         return self.sections.pop(index)
+
+    def set_section_levels(self, level: int) -> bool:
+        '''
+        Set section levels of all subsections
+        '''
+        for section in self.sections:
+            section.level = level
+            section.set_section_levels(level + 1)
+
+    def generate_root(self, prefix: str=None) -> Self:
+        '''
+        Generate section as root, set level to 1 and all sub-sections accordingly
+        
+        prefix : Add prefix to new title file
+        '''
+        new_obj = deepcopy(self)
+        if prefix:
+            new_obj.title = f'{prefix}{self.title}'
+        new_obj.level = 1
+        new_obj.set_section_levels(2)
+        return new_obj
 
     def write(self) -> str:
         '''

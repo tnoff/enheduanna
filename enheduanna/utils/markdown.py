@@ -1,7 +1,8 @@
 from json import dumps
 from re import search
-from typing import List
+from typing import List, Tuple
 
+from enheduanna.types.markdown_file import MarkdownFile
 from enheduanna.types.markdown_section import MarkdownSection
 from enheduanna.types.rollup_section import RollupSection
 
@@ -32,11 +33,13 @@ def rollup_section_generate_from_json(data_input: List[dict]) -> List[RollupSect
         return_data.append(RollupSection.from_json(dumps(section)))
     return return_data
 
-def _gather_all_section_data(markdown_sections: List[MarkdownSection], rollup_sections: List[str], rollup_mapping: dict) -> bool:
+def _gather_all_section_data(markdown_file: MarkdownFile, rollup_sections: List[str], ignore_sections: List[str],
+                             rollup_mapping: dict, document_list: list) -> bool:
     '''
     Recursively gather all section data in rollup section names
     '''
-    for section in markdown_sections:
+    for section in markdown_file.root_section.sections:
+        match_found = False
         for rollup_section in rollup_sections:
             if section.title == rollup_section.title:
                 rollup_mapping.setdefault(section.title, {
@@ -45,23 +48,31 @@ def _gather_all_section_data(markdown_sections: List[MarkdownSection], rollup_se
                     'groupBy': rollup_section.groupBy,
                 })
                 rollup_mapping[section.title]['contents'] += f'{section.contents}\n'
-        _gather_all_section_data(section.sections, rollup_sections, rollup_mapping)
+                match_found = True
+                continue
+        if not match_found and section.level > 1 and section.title not in ignore_sections:
+            document_section = markdown_file.root_section.remove_section(section.title)
+            markdown_file.write()
+            document_list.append(document_section.generate_root(prefix=f'{markdown_file.root_section.title} '))
     return True
 
-def combine_markdown_sections(markdown_sections: List[MarkdownSection], rollup_sections: List[RollupSection]) -> List[MarkdownSection]:
+def combine_markdown_files(markdown_files: List[MarkdownFile], rollup_sections: List[RollupSection],
+                           ignore_sections: List[str]) -> Tuple[List[MarkdownSection], List[MarkdownSection]]:
     '''
     Combine markdown sections by the rollup titles
 
     markdown_sections: Sections of markdown
     rollup_sections: List of rollup sections
+    ignore_sections: Ignore sections when making new documents
     '''
-
     section_mapping = {}
-    _gather_all_section_data(markdown_sections, rollup_sections, section_mapping)
-    return_data = []
+    document_list = []
+    for markdown_file in markdown_files:
+        _gather_all_section_data(markdown_file, rollup_sections, ignore_sections, section_mapping, document_list)
+    rollup_data = []
     for section, section_data in section_mapping.items():
         if not section_data['regex']:
-            return_data.append(MarkdownSection(section, section_data['contents']))
+            rollup_data.append(MarkdownSection(section, section_data['contents']))
             continue
         matches_mapping = {}
         not_matching = ''
@@ -77,8 +88,8 @@ def combine_markdown_sections(markdown_sections: List[MarkdownSection], rollup_s
         for _groupBy, contents in matches_mapping.items():
             generated_content += f'{contents}\n'
         generated_content += f'{not_matching}\n'
-        return_data.append(MarkdownSection(section, generated_content))
+        rollup_data.append(MarkdownSection(section, generated_content))
     # Final touchups to content
-    for section in return_data:
+    for section in rollup_data:
         section.contents = f'{section.contents.rstrip()}'
-    return return_data
+    return rollup_data, document_list
