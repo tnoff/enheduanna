@@ -13,7 +13,7 @@ from enheduanna.utils.days import get_end_of_week, get_start_of_week
 from enheduanna.utils.files import list_markdown_files, find_last_markdown_file
 from enheduanna.utils.markdown import section_generate_from_json
 from enheduanna.utils.markdown import rollup_section_generate_from_json
-from enheduanna.utils.markdown import combine_markdown_sections
+from enheduanna.utils.markdown import combine_markdown_files
 
 class ConfigException(Exception):
     '''
@@ -22,6 +22,7 @@ class ConfigException(Exception):
 
 CONFIG_DEFAULT = Path.home() / '.enheduanna.yml'
 FOLDER_DEFAULT = Path.home() / 'Notes'
+DOCUMENT_DEFAULT = Path.home() / 'Documents'
 DATE_FORMAT_DEFAULT = '%Y-%m-%d'
 
 SECTIONS_DEFAULT = [
@@ -72,6 +73,9 @@ def get_config_options(config: dict, note_folder: str, date_format: str) -> dict
         config['date_format'] = date_format
     else:
         config['date_format'] = config.get('date_format', DATE_FORMAT_DEFAULT)
+
+    config['document_folder'] = Path(config.get('document_folder', DOCUMENT_DEFAULT))
+
     try:
         config['sections'] = section_generate_from_json(config.get('sections', SECTIONS_DEFAULT))
     except ValidationError as e:
@@ -134,6 +138,7 @@ def main(context: click.Context, config_file: str, note_folder: str, date_format
     '''
     # Load config options
     config = {}
+    config_file = Path(config_file)
     if config_file.exists():
         config = parse_config(str(config_file))
     config = get_config_options(config, note_folder, date_format)
@@ -171,10 +176,12 @@ def rollup(context: click.Context, file_dir: str, title, rollup_name: str):
     '''
     file_dir = Path(file_dir)
     title = title or f'Summary | {file_dir.name.replace("_", " -> ")}'
-    markdown_sections = []
+    markdown_files = []
     for path in list_markdown_files(file_dir):
-        markdown_sections.append(MarkdownFile.from_file(path).root_section)
-    combos = combine_markdown_sections(markdown_sections, context.obj['config']['rollup_sections'])
+        markdown_files.append(MarkdownFile.from_file(path))
+    # Ignore sections set automatically but not in rollup
+    ignore_sections = set(i.title for i in context.obj['config']['sections']) - set([i.title for i in context.obj['config']['rollup_sections']]) #pylint:disable=consider-using-set-comprehension
+    combos, documents = combine_markdown_files(markdown_files, context.obj['config']['rollup_sections'], ignore_sections)
     new_document = MarkdownSection(title, '')
     for section in combos:
         section.level = 2
@@ -182,6 +189,11 @@ def rollup(context: click.Context, file_dir: str, title, rollup_name: str):
     new_path = file_dir / rollup_name
     new_path.write_text(new_document.write())
     click.echo(f'Rollup data written to file {new_path}')
+    for document in documents:
+        new_path = context.obj['config']['document_folder'] / f'{document.title}.md'
+        new_file = MarkdownFile(new_path, document)
+        new_file.write()
+        click.echo(f'Writing document to file {new_path}')
 
 if __name__ == '__main__':
     main(obj={}) # pylint:disable=no-value-for-parameter
