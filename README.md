@@ -2,7 +2,7 @@
 
 Command line tool for creating daily note Markdown files. Organizes the daily note files into weekly directories, and has functions for "Rolling Up" the notes into weekly summaries.
 
-Useful for staying on top of current projects, follow up items, and how many meetings you've had in a given week. Also useful for keeping track of work you've done in the past for yearly self-reviews and rsume updating.
+Useful for staying on top of current projects, follow up items, and how many meetings you've had in a given week. Also useful for keeping track of work you've done in the past for yearly self-reviews and resume updating.
 
 ## Install
 
