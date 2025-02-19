@@ -141,7 +141,7 @@ def test_ready_file_cli():
         assert result.output == f'Created note file {tmpdir}/2024-11-25_2024-12-01/2024-12-01.md\n'
 
 def test_rollup():
-    file1_text = '''# 2025-01-01
+    file1_text = '''# 2025-02-10
 
 ## Work Done
 
@@ -152,35 +152,25 @@ def test_rollup():
 ## Random Section Not tracked
 
 This wont show up in the rollup
-
-## Follow Ups
-
-- Random follow up for today
 '''
-    file2_text = '''# 2025-01-02
+    file2_text = '''# 2025-02-11
 
 ## Work Done
 
 - Another update on that ticket (XYZ-234)
-
-## Follow Ups
-
-- Dont forget to do this other thing
 '''
 
     with TemporaryDirectory() as tmpdir:
         dir_path = Path(tmpdir) / '2025-02-10_2025-02-16'
         dir_path.mkdir()
+        file1 = dir_path / '2025-02-10.md'
+        file1.write_text(file1_text)
+        file2 = dir_path / '2025-02-11.md'
+        file2.write_text(file2_text)
         runner = CliRunner()
-        with NamedTemporaryFile(dir=dir_path, prefix='abc', suffix='.md') as file1:
-            path1 = Path(file1.name)
-            path1.write_text(file1_text)
-            with NamedTemporaryFile(dir=dir_path, prefix='xyz', suffix='.md') as file2:
-                path2 = Path(file2.name)
-                path2.write_text(file2_text)
-                result = runner.invoke(main, ['-n', tmpdir, 'rollup', str(dir_path)])
-                expected_path = dir_path / 'summary.md'
-                assert 'Rollup data written to file' in result.output
-                assert expected_path.exists()
-                text = expected_path.read_text()
-                assert text == f'# Summary | 2025-02-10 -> 2025-02-16\n\n## Work Done\n\n- I did this ticket today (XYZ-234)\n- Another update on that ticket (XYZ-234)\n\n- Another random ticket I did (ASF-123)\n\n- Some random task\n'
+        result = runner.invoke(main, ['-n', tmpdir, 'rollup', str(dir_path)])
+        expected_path = dir_path / 'summary.md'
+        assert 'Rollup data written to file' in result.output
+        assert expected_path.exists()
+        text = expected_path.read_text()
+        assert text == f'# Summary | 2025-02-10 -> 2025-02-16\n\n## Work Done\n\n- I did this ticket today (XYZ-234)\n- Another update on that ticket (XYZ-234)\n\n- Another random ticket I did (ASF-123)\n\n- Some random task\n'
