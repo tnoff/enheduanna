@@ -19,7 +19,7 @@ def list_markdown_files(file_dir: Path, only_include_daily_note: bool = True) ->
         if only_include_daily_note and not match(MATCH_DAILY_NOTE, path.name):
             continue
         all_paths.append(path)
-    return sorted(all_paths, key=str)
+    return sorted(all_paths, key=lambda x: x.name)
 
 
 def find_last_markdown_file(file_dir: Path, only_include_daily_note: bool = True) -> Union[None, Path]:
