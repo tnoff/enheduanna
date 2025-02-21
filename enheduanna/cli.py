@@ -13,7 +13,7 @@ from enheduanna.utils.days import get_end_of_week, get_start_of_week
 from enheduanna.utils.files import list_markdown_files, find_last_markdown_file
 from enheduanna.utils.markdown import section_generate_from_json
 from enheduanna.utils.markdown import rollup_section_generate_from_json
-from enheduanna.utils.markdown import combine_markdown_files
+from enheduanna.utils.markdown import generate_markdown_rollup
 
 class ConfigException(Exception):
     '''
@@ -57,23 +57,13 @@ ROLLUP_SECTIONS_DEFAULT = [
     },
 ]
 
-def get_config_options(config: dict, note_folder: str, date_format: str) -> dict:
+def get_config_options(config: dict) -> dict:
     '''
     Get config options from config file and cli
     config : Config dictionary
-    note_folder : Note folder cli override
-    date_format : Date format cli override
     '''
-    if note_folder is not None:
-        config['note_folder'] = Path(note_folder)
-    else:
-        config['note_folder'] = Path(config.get('note_folder', FOLDER_DEFAULT))
-
-    if date_format is not None:
-        config['date_format'] = date_format
-    else:
-        config['date_format'] = config.get('date_format', DATE_FORMAT_DEFAULT)
-
+    config['note_folder'] = Path(config.get('note_folder', FOLDER_DEFAULT))
+    config['date_format'] = config.get('date_format', DATE_FORMAT_DEFAULT)
     config['document_folder'] = Path(config.get('document_folder', DOCUMENT_DEFAULT))
 
     try:
@@ -128,20 +118,17 @@ def ensure_daily_file(weekly_folder: Path, today: date, date_format: str, new_se
 @click.group()
 @click.option('-c', '--config-file', default=CONFIG_DEFAULT, show_default=True,
               type=click.Path(file_okay=True, dir_okay=False, exists=False))
-@click.option('-n', '--note-folder',
-              type=click.Path(file_okay=False, dir_okay=True, exists=False))
-@click.option('-df', '--date-format')
 @click.pass_context
-def main(context: click.Context, config_file: str, note_folder: str, date_format: str):
+def main(context: click.Context, config_file: str):
     '''
-    Main cli runner
+    Enheduanna CLI Runner
     '''
     # Load config options
     config = {}
     config_file = Path(config_file)
     if config_file.exists():
         config = parse_config(str(config_file))
-    config = get_config_options(config, note_folder, date_format)
+    config = get_config_options(config)
     context.obj = {
         'config': config,
     }
@@ -181,7 +168,7 @@ def rollup(context: click.Context, file_dir: str, title, rollup_name: str):
         markdown_files.append(MarkdownFile.from_file(path))
     # Ignore sections set automatically but not in rollup
     ignore_sections = set(i.title for i in context.obj['config']['sections']) - set([i.title for i in context.obj['config']['rollup_sections']]) #pylint:disable=consider-using-set-comprehension
-    combos, documents = combine_markdown_files(markdown_files, context.obj['config']['rollup_sections'], ignore_sections)
+    combos, documents = generate_markdown_rollup(markdown_files, context.obj['config']['rollup_sections'], ignore_sections)
     new_document = MarkdownSection(title, '')
     for section in combos:
         section.level = 2

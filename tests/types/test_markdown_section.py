@@ -1,6 +1,7 @@
 from pytest import raises
 
 from enheduanna.types.markdown_section import MarkdownSection, MarkdownException
+from enheduanna.types.rollup_section import RollupSection
 
 def test_markdown_invalid_section():
     m = MarkdownSection('2025-02-16', 'generic contents')
@@ -38,3 +39,41 @@ def test_markdown_generate_root():
     assert result.title == 'Another sub-section'
     assert result.level == 1
     assert result.sections[0].title == 'Another level in'
+
+def test_markdown_section_merge():
+    m = MarkdownSection('2025-02-16', 'generic contents')
+    m1 = MarkdownSection('Work Done', '- Some example lines\n- That will be combined', level=2)
+    m2 = MarkdownSection('Easy Work', '- Light work, was easy', level=3)
+    m3 = MarkdownSection('Hard Work', '- Very hard, never do again', level=3)
+    m1.add_section(m2)
+    m1.add_section(m3)
+    m.add_section(m1)
+
+    n = MarkdownSection('2025-02-17', 'another generic contents')
+    n1 = MarkdownSection('Work Done', '- More stuff done\n- even more!', level=2)
+    n2 = MarkdownSection('Easy Work', '- Still very easy weee', level=3)
+    n1.add_section(n2)
+    n.add_section(n1)
+
+    m.merge(n)
+    assert m.contents == 'generic contents'
+    assert m.title == '2025-02-16'
+    assert m.sections[0].contents == '- Some example lines\n- That will be combined\n- More stuff done\n- even more!\n'
+    assert m.sections[0].title == 'Work Done'
+    assert m.sections[0].level == 2
+    assert m.sections[0].sections[0].contents == '- Light work, was easy\n- Still very easy weee\n'
+    assert m.sections[0].sections[0].title == 'Easy Work'
+    assert m.sections[0].sections[0].level == 3
+    assert m.sections[0].sections[1].contents == '- Very hard, never do again'
+    assert m.sections[0].sections[1].title == 'Hard Work'
+    assert m.sections[0].sections[1].level == 3
+
+def test_markdown_section_group_contents():
+    m = MarkdownSection('2025-02-16', 'generic contents')
+    m1 = MarkdownSection('Work Done', '- Work on ticket (ABC-1234)\n- Work on another ticket (XYZ-234)\n- More work on the original ticket (ABC-1234)\nRandom input', level=2)
+    m.add_section(m1)
+
+    r = RollupSection('Work Done', regex='\\((?P<ticket>[A-Za-z]+-[0-9]+)\\)', groupBy='ticket')
+    m.group_contents(r)
+    assert m.contents == 'generic contents'
+    assert m.sections[0].contents == '- Work on ticket (ABC-1234)\n- More work on the original ticket (ABC-1234)\n\n- Work on another ticket (XYZ-234)\n\nRandom input'

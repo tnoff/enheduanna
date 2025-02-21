@@ -1,9 +1,12 @@
 from copy import deepcopy
+from re import search
 from typing import Self, Union
 
 from pydantic import Field
 from pydantic import TypeAdapter
 from pydantic.dataclasses import dataclass
+
+from enheduanna.types.rollup_section import RollupSection
 
 class MarkdownException(Exception):
     '''
@@ -70,6 +73,59 @@ class MarkdownSection:
         new_obj.level = 1
         new_obj.set_section_levels(2)
         return new_obj
+
+    def merge(self, new_section: Self) -> bool:
+        '''
+        Merge this section with another one
+
+        new_section : New section to merge with
+        '''
+        if new_section.title == self.title and new_section.level == self.level:
+            self.contents = f'{self.contents}\n{new_section.contents}\n'
+        # First see if any of our sub-sections are in the new one, remove and add
+        for section in self.sections:
+            result = new_section.remove_section(section.title)
+            if not result:
+                continue
+            section.merge(result)
+        # Then add remaining sections to this one
+        for section in new_section.sections:
+            self.add_section(section)
+        return True
+
+    def group_contents(self, rollup_section: RollupSection, force_grouping: bool = False) -> bool:
+        '''
+        Group contents by a rollup section regex
+
+        rollup_section : RollupSection to group by
+        force_grouping : Force grouping on subsections
+        '''
+        if not force_grouping and not rollup_section.regex and self.title != rollup_section.title:
+            return False
+        matching = {}
+        non_matching = []
+        for item in self.contents.split('\n'):
+            if not item:
+                continue
+            matcher = search(rollup_section.regex, item)
+            if matcher:
+                key = matcher.group(rollup_section.groupBy)
+                matching.setdefault(key, [])
+                matching[key].append(item)
+                continue
+            non_matching.append(item)
+        new_contents = ''
+        for _key, value in matching.items():
+            for item in value:
+                new_contents = f'{new_contents}{item}\n'
+            new_contents = f'{new_contents}\n'
+        for item in non_matching:
+            new_contents = f'{new_contents}{item}\n'
+        new_contents = new_contents.rstrip()
+        self.contents = new_contents
+        for section in self.sections:
+            section.group_contents(rollup_section, force_grouping=True)
+        return True
 
     def write(self) -> str:
         '''

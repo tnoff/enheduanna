@@ -9,6 +9,7 @@ class RollupSection:
     RollupSections for Markdown
     '''
     title: str
+    level: int = 2
     regex: str = None
     groupBy: str = None
 
