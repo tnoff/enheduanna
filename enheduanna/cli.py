@@ -13,7 +13,7 @@ from enheduanna.utils.days import get_end_of_week, get_start_of_week
 from enheduanna.utils.files import list_markdown_files, find_last_markdown_file
 from enheduanna.utils.markdown import section_generate_from_json
 from enheduanna.utils.markdown import rollup_section_generate_from_json
-from enheduanna.utils.markdown import combine_markdown_files
+from enheduanna.utils.markdown import generate_markdown_rollup
 
 class ConfigException(Exception):
     '''
@@ -134,7 +134,7 @@ def ensure_daily_file(weekly_folder: Path, today: date, date_format: str, new_se
 @click.pass_context
 def main(context: click.Context, config_file: str, note_folder: str, date_format: str):
     '''
-    Main cli runner
+    Enheduanna CLI Runner
     '''
     # Load config options
     config = {}
@@ -181,7 +181,7 @@ def rollup(context: click.Context, file_dir: str, title, rollup_name: str):
         markdown_files.append(MarkdownFile.from_file(path))
     # Ignore sections set automatically but not in rollup
     ignore_sections = set(i.title for i in context.obj['config']['sections']) - set([i.title for i in context.obj['config']['rollup_sections']]) #pylint:disable=consider-using-set-comprehension
-    combos, documents = combine_markdown_files(markdown_files, context.obj['config']['rollup_sections'], ignore_sections)
+    combos, documents = generate_markdown_rollup(markdown_files, context.obj['config']['rollup_sections'], ignore_sections)
     new_document = MarkdownSection(title, '')
     for section in combos:
         section.level = 2
