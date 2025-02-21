@@ -1,8 +1,10 @@
 # Enheduanna
 
-Command line tool for creating daily note Markdown files. Organizes the daily note files into weekly directories, and has functions for "Rolling Up" the notes into weekly summaries.
+Command line tool for creating daily note files in Markdown. Organizes the daily notes into weekly directories, and has functions to "rollup" into weekly summaries and create additional "documentation" files from these notes.
 
-Useful for staying on top of current projects, follow up items, and how many meetings you've had in a given week. Also useful for keeping track of work you've done in the past for yearly self-reviews and resume updating.
+Useful for keeping track of work done throughout the week, tracking follow up items, and starting proper documentation from your notes. In particular helps with keeping track of your work throughout the year/quarter for when you do self-reviews or need to update your resume.
+
+Named after [Enheduanna](https://en.wikipedia.org/wiki/Enheduanna), sometimes considered the first known author in history.
 
 ## Install
 
@@ -15,11 +17,16 @@ $ pip install enheduanna/
 
 ## Basic Usage
 
-Basic cli usage.
+Comes with two commands to start:
+
+- `enheduanna ready-file` Creates the daily note file for today
+- `enheduanna rollup` Rolls up the daily notes into weekly summaries and other documentation.
+
+Run `enheduanna --help` to see all options.
 
 ## Daily Note File
 
-The `ready-file` command wll create a markdown file for todays notes. The note file will be named for the current day, such as `2025-01-21.md`. The file will be placed in a directory named for the current week. 
+The `ready-file` command will create a markdown file for today's notes. The note file will be named for the current day, such as `2025-01-21.md`. The file will be placed in a directory named for the current week. 
 
 
 The format will look like this:
@@ -33,9 +40,9 @@ Notes/
     2025-01-23.md
 ```
 
-The date format used in the file names can be overriden, as well as the note folder location.
+The date format used in the file names can be overridden, as well as the note folder location.
 
-Each file will have default sections given, with a title of todays date:
+Each file will have default sections given, with a title of today's date:
 
 ```
 # 2025-01-23
@@ -57,12 +64,13 @@ Each file will have default sections given, with a title of todays date:
 ## Scratch
 ```
 
-These sections can be overriden via the config.
+These default sections for the daily files can be overridden via the config.
 
 
 ### Carryover Sections
 
-By default the `Follow Ups` section is set is a "carryover section". This means that enheduanna will find the last existing markdown notes file, grab the contents of that `Follow Ups` section if it can find one, and copy that into the file for the day. The contents of the older file found will be updated to removed the carryover section.
+By default the `Follow Ups` section is set is a "carryover section". This means that enheduanna will find the most recent existing daily note file, find the section within that file, and "carry it over" to the new file. The contents of the section in the older file will be removed and automatically added into the new daily note file.
+
 
 For example, if you have the following files, with `2025-01-23.md` being the most recent file:
 
@@ -86,7 +94,7 @@ And the `2025-01-23.md` file contains a `Follow Ups` section:
 - Need to follow up with product about the new feature
 ```
 
-When you run the `ready-file` command and a new file is created, it will have the following contents:
+When you run the `ready-file` the next day (or any later date), a new file is created, it will have the following contents:
 
 ```
 # 2025-01-24
@@ -117,7 +125,7 @@ Use the `rollup` command against a weekly note directory to roll up all of the d
 
 By default the `Work Done` section will be combined together and placed into the new `summary.md` file.
 
-The contents of the rolled up sections can also be grouped together to make it easier to edit later, by default the `Work Done` section is grouped together by a regex which looks for jira ticket numbers within parenthesis, such as `(ABC-1234)`.
+The contents of the combined sections can also be grouped together by a regex to make it easier to edit later. By default the `Work Done` section is grouped together by a regex which looks for Jira ticket numbers within parenthesis, such as `(ABC-1234)`.
 
 If no regex grouping options are given, the contents will be placed into the rolled up sections in the order they are read.
 
@@ -128,7 +136,7 @@ For example if you had these lines in different note files:
 ## Work Done
 
 - Working on some ticket (ABC-1234)
-- Fixing that one bug thats been bugging me forever (XYZ-2345)
+- Fixing that one bug that's been bugging me forever (XYZ-2345)
 ```
 
 2025-01-21.md
@@ -146,12 +154,12 @@ summary.md
 
 - Working on some ticket (ABC-1234)
 - Working on that same ticket, had more issues (ABC-1234)
-- Fixing that one bug thats been bugging me forever (XYZ-2345)
+- Fixing that one bug that's been bugging me forever (XYZ-2345)
 ```
 
 ### Document Rollup
 
-Additionally set a "Document" directory to pull out write ups you've placed in the daily notes. The idea here is that one-off sections that are not part of the normal section process can be removed and moved to the Document section, as a way of protyping documentation bits such as runbooks. By default the new documents will be placed in the `~/Documents` directory.
+Additionally set a "Document" directory to pull out write ups you've placed in the daily notes. The idea here is that one-off sections that are not part of the normal section process can be removed and moved to the Document section, as a way of prototyping documentation bits such as runbooks. By default the new documents will be placed in the `~/Documents` directory.
 
 For example if you have the following daily file:
 
@@ -160,7 +168,7 @@ For example if you have the following daily file:
 ## Work Done
 
 - Working on some ticket (ABC-1234)
-- Fixing that one bug thats been bugging me forever (XYZ-2345)
+- Fixing that one bug that's been bugging me forever (XYZ-2345)
 
 ## Steps to Reboot Servers
 
@@ -169,7 +177,7 @@ ssh ubuntu@foo.com
 sudo reboot
 ```
 
-The rollup command will create a new file named `2025-01-20 Steps to Reboot Servers.md` in the Document directory with the following contents:
+The `rollup` command will create a new file named `2025-01-20 Steps to Reboot Servers.md` in the document directory with the following contents:
 
 ```
 ## 2025-01-20 Steps to Reboot Servers
@@ -179,10 +187,12 @@ ssh ubuntu@foo.com
 sudo reboot
 ```
 
+The contents of the section that was moved will also be removed from the original notes file, in this case `2025-01-20.md`.
+
 ## Config File
 
 The config is a YAML config that allows for environment variable options through [pyaml-env](https://github.com/mkaranasou/pyaml_env).
-By default the cli will look for the config file at `~/.enheduanna.yml`, and this can be overriden with the cli `-c` option.
+By default the cli will look for the config file at `~/.enheduanna.yml`, and this can be overridden with the cli `-c` option.
 
 ## Config Options
 
@@ -203,7 +213,7 @@ date_format: %Y-%m-%d
 
 ### Note Folder
 
-Override the note folder all weekly directories are placed in. Can be overriden via the cli with the `-nf` cli option.
+Override the note folder all weekly directories are placed in. Can be overridden via the cli with the `-nf` cli option.
 
 Example Config
 
@@ -214,13 +224,13 @@ note_folder: /home/user/Notes
 
 ### Sections
 
-The default sections for the daily note markdown files. Each "MarkdownSecion" should have the three following params:
+The default sections for the daily note markdown files. Each "MarkdownSection" should have the three following params:
 
 | Param | Type | Description | 
 | ----- | ---- | ----------- |
 | title | str | Title of section |
 | contents | str | Placeholder contents of section |
-| level | int | Level of sction, meaning how many `#`'s are placed before the title
+| level | int | Level of section, meaning how many `#`'s are placed before the title
 | carryover | boolean | If the contents of the previous daily note folder should be carried over | 
 
 
@@ -250,7 +260,7 @@ sections:
 
 Rollup sections that determine which sections are combined together during the `rollup` command. A better summary is above, but you can set `regex` and `groupBy` options to group common bits of content in the sections.
 
-Only the `title` is required, the `regex` and `groupBy` are optional.
+Only the `title` is required, the `regex` and `groupBy` are optional. You can also override the `level` that is combined, meaning the section level of the rollup section, by default this is set to 2.
 
 Example config:
 
@@ -258,6 +268,7 @@ Example config:
 ---
 rollup_sections:
   - title: Work Done
+    level: 2
     regex: "\\((?P<ticket>[A-Za-z]+-[0-9]+)\\)"
     groupBy: ticket
 ```
