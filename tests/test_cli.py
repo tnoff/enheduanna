@@ -24,30 +24,22 @@ def test_week_functions():
     assert get_end_of_week(today) == date(2025, 2, 2)
 
 def test_get_config_options():
-    result = get_config_options({}, None, None)
+    result = get_config_options({})
     assert result['note_folder'] == FOLDER_DEFAULT
     assert result['date_format'] == DATE_FORMAT_DEFAULT
 
     result = get_config_options({
         'note_folder': '/home/foo/bar',
         'date_format': '%Y_%m_%d'
-    }, None, None)
+    })
     assert str(result['note_folder']) == '/home/foo/bar'
     assert result['date_format'] == '%Y_%m_%d'
-
-    result = get_config_options({
-        'note_folder': '/home/foo/bar',
-        'date_format': '%Y_%m_%d'
-    }, '/home/foo/bar2', '%d-%m-%Y')
-
-    assert str(result['note_folder']) == '/home/foo/bar2'
-    assert str(result['date_format']) == '%d-%m-%Y'
 
 def test_validation_of_section_schema():
     with raises(ConfigException) as e:
         get_config_options({
             'sections': 'foo'
-        }, None, None)
+        })
     assert 'Invalid section config given' in str(e.value)
     with raises(ConfigException) as e:
         get_config_options({
@@ -57,14 +49,14 @@ def test_validation_of_section_schema():
                     'title': 'bar',
                 }
             ]
-        }, None, None)
+        })
     assert 'Invalid section config given' in str(e.value)
 
 def test_validation_rollup_sections():
     with raises(ConfigException) as e:
         get_config_options({
             'rollup_sections': 'foo'
-        }, None, None)
+        })
     assert 'Invalid rollup sections given' in str(e.value)
 
 def test_create_weekly_folder():
@@ -124,21 +116,27 @@ Make sure this is still there afterward
 - Carry over this followup to the next day
 '''
     with TemporaryDirectory() as tmpdir:
-        dir_path = Path(tmpdir)
-        weekly_dir = dir_path / '2025-02-10_2025-02-16'
-        weekly_dir.mkdir()
-        last_daily_path = weekly_dir / '2025-02-16'
-        last_daily_path.write_text(file1_text)
-        runner = CliRunner()
-        result = runner.invoke(main, ['-n', tmpdir, 'ready-file'])
-        assert result.output == f'Created note file {tmpdir}/2025-02-17_2025-02-23/2025-02-17.md\n'
+        with NamedTemporaryFile() as tmp_config:
+            config_path = Path(tmp_config.name)
+            config_path.write_text(f'---\nnote_folder: {tmpdir}\n')
+            dir_path = Path(tmpdir)
+            weekly_dir = dir_path / '2025-02-10_2025-02-16'
+            weekly_dir.mkdir()
+            last_daily_path = weekly_dir / '2025-02-16'
+            last_daily_path.write_text(file1_text)
+            runner = CliRunner()
+            result = runner.invoke(main, ['-c', tmp_config.name, 'ready-file'])
+            assert result.output == f'Created note file {tmpdir}/2025-02-17_2025-02-23/2025-02-17.md\n'
 
 @freeze_time('2024-12-01 12:00:00', tz_offset=0)
 def test_ready_file_cli():
     with TemporaryDirectory() as tmpdir:
-        runner = CliRunner()
-        result = runner.invoke(main, ['-n', tmpdir, 'ready-file'])
-        assert result.output == f'Created note file {tmpdir}/2024-11-25_2024-12-01/2024-12-01.md\n'
+        with NamedTemporaryFile() as tmp_config:
+            config_path = Path(tmp_config.name)
+            config_path.write_text(f'---\nnote_folder: {tmpdir}\n')
+            runner = CliRunner()
+            result = runner.invoke(main, ['-c', tmp_config.name, 'ready-file'])
+            assert result.output == f'Created note file {tmpdir}/2024-11-25_2024-12-01/2024-12-01.md\n'
 
 def test_rollup():
     file1_text = '''# 2025-02-10

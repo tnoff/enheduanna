@@ -57,23 +57,13 @@ ROLLUP_SECTIONS_DEFAULT = [
     },
 ]
 
-def get_config_options(config: dict, note_folder: str, date_format: str) -> dict:
+def get_config_options(config: dict) -> dict:
     '''
     Get config options from config file and cli
     config : Config dictionary
-    note_folder : Note folder cli override
-    date_format : Date format cli override
     '''
-    if note_folder is not None:
-        config['note_folder'] = Path(note_folder)
-    else:
-        config['note_folder'] = Path(config.get('note_folder', FOLDER_DEFAULT))
-
-    if date_format is not None:
-        config['date_format'] = date_format
-    else:
-        config['date_format'] = config.get('date_format', DATE_FORMAT_DEFAULT)
-
+    config['note_folder'] = Path(config.get('note_folder', FOLDER_DEFAULT))
+    config['date_format'] = config.get('date_format', DATE_FORMAT_DEFAULT)
     config['document_folder'] = Path(config.get('document_folder', DOCUMENT_DEFAULT))
 
     try:
@@ -128,11 +118,8 @@ def ensure_daily_file(weekly_folder: Path, today: date, date_format: str, new_se
 @click.group()
 @click.option('-c', '--config-file', default=CONFIG_DEFAULT, show_default=True,
               type=click.Path(file_okay=True, dir_okay=False, exists=False))
-@click.option('-n', '--note-folder',
-              type=click.Path(file_okay=False, dir_okay=True, exists=False))
-@click.option('-df', '--date-format')
 @click.pass_context
-def main(context: click.Context, config_file: str, note_folder: str, date_format: str):
+def main(context: click.Context, config_file: str):
     '''
     Enheduanna CLI Runner
     '''
@@ -141,7 +128,7 @@ def main(context: click.Context, config_file: str, note_folder: str, date_format
     config_file = Path(config_file)
     if config_file.exists():
         config = parse_config(str(config_file))
-    config = get_config_options(config, note_folder, date_format)
+    config = get_config_options(config)
     context.obj = {
         'config': config,
     }

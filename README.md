@@ -200,7 +200,7 @@ The various config options.
 
 ### Date Format
 
-Set the date format in the config file or via the `-df` cli option. The date format will determine the paths of the directories and the note files, as well as the default title of each note file.
+Set the date format in the config file. The date format will determine the paths of the directories and the note files, as well as the default title of each note file.
 
 Should be in the standard [python datetime format](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes).
 
@@ -213,7 +213,7 @@ date_format: %Y-%m-%d
 
 ### Note Folder
 
-Override the note folder all weekly directories are placed in. Can be overridden via the cli with the `-nf` cli option.
+Override the note folder all weekly directories are placed in.
 
 Example Config
 
