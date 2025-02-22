@@ -41,6 +41,7 @@ def _gather_all_section_data(markdown_file: MarkdownFile, parent_section: Markdo
 
     rollup_mapping/document_list: Kept here for loop to return in main function
     '''
+    doc_sections = []
     for section in parent_section.sections:
         match_found = False
         for rollup_section in rollup_sections:
@@ -57,10 +58,15 @@ def _gather_all_section_data(markdown_file: MarkdownFile, parent_section: Markdo
 
         if not match_found:
             if section.level > 1 and section.title not in ignore_sections:
-                document_section = parent_section.remove_section(section.title)
-                markdown_file.write()
-                document_list.append(document_section.generate_root(prefix=f'{markdown_file.root_section.title} '))
+                doc_sections.append(section.title)
+                continue
             _gather_all_section_data(markdown_file, section, rollup_sections, ignore_sections, rollup_mapping, document_list)
+    # Remove these at the end since it cant muck with the order of sections
+    for title in doc_sections:
+        document_section = parent_section.remove_section(title)
+        markdown_file.write()
+        document_list.append(document_section.generate_root(prefix=f'{markdown_file.root_section.title} '))
+
     return True
 
 def generate_markdown_rollup(markdown_files: List[MarkdownFile], rollup_sections: List[RollupSection],

@@ -54,6 +54,7 @@ ROLLUP_SECTIONS_DEFAULT = [
         'title': 'Work Done',
         'regex': '\\((?P<ticket>[A-Za-z]+-[0-9]+)\\)',
         'groupBy': 'ticket',
+        'level': 2,
     },
 ]
 

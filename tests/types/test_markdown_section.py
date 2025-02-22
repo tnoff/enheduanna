@@ -10,6 +10,12 @@ def test_markdown_invalid_section():
         m.add_section(MarkdownSection('Sub-Section', '', level=2))
     assert 'Cannot add section, a section with title "Sub-Section" already exists' in str(e.value)
 
+def test_markdown_invalid_level():
+    m = MarkdownSection('2025-02-16', 'generic contents', level=2)
+    with raises(MarkdownException) as e:
+        m.add_section(MarkdownSection('Sub-Section', '', level=1))
+    assert 'Cannot add section, has a lower level than this one' in str(e.value)
+
 def test_markdown_section_remove():
     m = MarkdownSection('2025-02-16', 'generic contents')
     m.add_section(MarkdownSection('Sub-Section', '- Some generic contents in list', level=2))
