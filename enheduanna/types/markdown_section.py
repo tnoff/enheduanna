@@ -31,6 +31,9 @@ class MarkdownSection:
         section : MarkdownSection
         '''
         TypeAdapter(MarkdownSection).validate_python(section)
+        # Check if section level valid
+        if self.level > section.level:
+            raise MarkdownException('Cannot add section, has a lower level than this one')
         # Check if section name already exists
         for existing_section in self.sections:
             if section.title == existing_section.title:
