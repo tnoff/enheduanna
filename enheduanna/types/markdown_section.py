@@ -6,12 +6,8 @@ from pydantic import Field
 from pydantic import TypeAdapter
 from pydantic.dataclasses import dataclass
 
+from enheduanna.exceptions import MarkdownException
 from enheduanna.types.rollup_section import RollupSection
-
-class MarkdownException(Exception):
-    '''
-    Generic class for exception errors
-    '''
 
 @dataclass
 class MarkdownSection:

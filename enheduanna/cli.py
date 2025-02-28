@@ -3,13 +3,11 @@ from pathlib import Path
 from typing import List
 
 import click
-from jira import JIRA
-from jira.exceptions import JIRAError
-from jsonschema import ValidationError as jsonValidationError
-from jsonschema import validate
 from pyaml_env import parse_config
-from pydantic import ValidationError
 
+from enheduanna.types.config.cli import CliConfig
+from enheduanna.types.config.jira import CliJiraConfig
+from enheduanna.types.config.file import CliFileConfig
 from enheduanna.types.markdown_file import MarkdownFile
 from enheduanna.types.markdown_section import MarkdownSection
 
@@ -19,97 +17,14 @@ from enheduanna.utils.markdown import section_generate_from_json
 from enheduanna.utils.markdown import rollup_section_generate_from_json
 from enheduanna.utils.markdown import generate_markdown_rollup
 
-JIRA_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'url': {
-            'type': 'string',
-        },
-        'email': {
-            'type': 'string',
-        },
-        'token': {
-            'type': 'string',
-        }
-    },
-    'required': ['url', 'email', 'token'],
-}
-
-class ConfigException(Exception):
-    '''
-    Generic Exception for config errors
-    '''
-
 CONFIG_DEFAULT = Path.home() / '.enheduanna.yml'
-FOLDER_DEFAULT = Path.home() / 'Notes'
-DOCUMENT_DEFAULT = Path.home() / 'Documents'
-DATE_FORMAT_DEFAULT = '%Y-%m-%d'
-
-SECTIONS_DEFAULT = [
-    {
-        'title': 'Work Done',
-        'contents': '- ',
-        'level': 2,
-    },
-    {
-        'title': 'Meetings',
-        'contents': '| Time | Meeting Name |\n| ---- | ------------ |\n| | |',
-        'level': 2,
-    },
-    {
-        'title': 'Follow Ups',
-        'contents': '- ',
-        'level': 2,
-        'carryover': True,
-    },
-    {
-        'title': 'Scratch',
-        'contents': '',
-        'level': 2,
-    }
-]
-
-ROLLUP_SECTIONS_DEFAULT = [
-    {
-        'title': 'Work Done',
-        'regex': '\\((?P<ticket>[A-Za-z]+-[0-9]+)\\)',
-        'groupBy': 'ticket',
-        'level': 2,
-    },
-]
 
 def get_config_options(config: dict) -> dict:
     '''
     Get config options from config file and cli
     config : Config dictionary
     '''
-    config['note_folder'] = Path(config.get('note_folder', FOLDER_DEFAULT))
-    config['date_format'] = config.get('date_format', DATE_FORMAT_DEFAULT)
-    config['document_folder'] = Path(config.get('document_folder', DOCUMENT_DEFAULT))
-
-    try:
-        config['sections'] = section_generate_from_json(config.get('sections', SECTIONS_DEFAULT))
-    except ValidationError as e:
-        raise ConfigException('Invalid section config given') from e
-    try:
-        config['rollup_sections'] = rollup_section_generate_from_json(config.get('rollup_sections', ROLLUP_SECTIONS_DEFAULT))
-    except ValidationError as e:
-        raise ConfigException('Invalid rollup sections given') from e
-    jira_config = config.get('jira', {}).get('config', {})
-    if jira_config:
-        try:
-            validate(jira_config, JIRA_SCHEMA)
-        except jsonValidationError as e:
-            raise ConfigException('Invalid jira config given') from e
-        config['jira_client'] = JIRA(server=jira_config['url'],
-                                     basic_auth=(jira_config['email'], jira_config['token']))
-        # Run a command against jira to check auth
-        try:
-            config['jira_client'].current_user()
-        except JIRAError as e:
-            raise ConfigException('Unable to load jira client') from e
-    
-    return config
+    return CliConfig.from_json(config)
 
 def create_weekly_folder(note_folder: Path, start: date, end: date, date_format: str) -> Path:
     '''
@@ -186,12 +101,12 @@ def ready_file(context: click.Context):
     start = get_start_of_week(today)
     end = get_end_of_week(today)
     # Find last file, see if it has any carryover sections
-    last_file = find_last_markdown_file(context.obj['config']['note_folder'])
+    last_file = find_last_markdown_file(context.obj['config'].file_config.note_folder)
     if last_file:
         last_file = MarkdownFile.from_file(last_file)
     # Get folder and file ready
-    weekly_folder = create_weekly_folder(context.obj['config']['note_folder'], start, end, context.obj['config']['date_format'])
-    day_file = ensure_daily_file(weekly_folder, today, context.obj['config']['date_format'], context.obj['config']['sections'], last_file)
+    weekly_folder = create_weekly_folder(context.obj['config'].file_config.note_folder, start, end, context.obj['config'].file_config.date_format)
+    day_file = ensure_daily_file(weekly_folder, today, context.obj['config'].file_config.date_format, context.obj['config'].file_config.daily_file_sections, last_file)
     click.echo(f'Created note file {day_file}')
 
 @file.command('rollup')
@@ -209,8 +124,8 @@ def rollup(context: click.Context, file_dir: str, title, rollup_name: str):
     for path in list_markdown_files(file_dir):
         markdown_files.append(MarkdownFile.from_file(path))
     # Ignore sections set automatically but not in rollup
-    ignore_sections = set(i.title for i in context.obj['config']['sections']) - set([i.title for i in context.obj['config']['rollup_sections']]) #pylint:disable=consider-using-set-comprehension
-    combos, documents = generate_markdown_rollup(markdown_files, context.obj['config']['rollup_sections'], ignore_sections)
+    ignore_sections = set(i.title for i in context.obj['config'].file_config.daily_file_sections) - set([i.title for i in context.obj['config'].file_config.rollup_sections]) #pylint:disable=consider-using-set-comprehension
+    combos, documents = generate_markdown_rollup(markdown_files, context.obj['config'].file_config.rollup_sections, ignore_sections)
     new_document = MarkdownSection(title, '')
     for section in combos:
         section.level = 2
@@ -219,7 +134,7 @@ def rollup(context: click.Context, file_dir: str, title, rollup_name: str):
     new_path.write_text(new_document.write())
     click.echo(f'Rollup data written to file {new_path}')
     for document in documents:
-        new_path = context.obj['config']['document_folder'] / f'{document.title}.md'
+        new_path = context.obj['config'].file_config.document_folder / f'{document.title}.md'
         new_file = MarkdownFile(new_path, document)
         new_file.write()
         click.echo(f'Writing document to file {new_path}')
