@@ -6,15 +6,12 @@ import click
 from pyaml_env import parse_config
 
 from enheduanna.types.config.cli import CliConfig
-from enheduanna.types.config.jira import CliJiraConfig
-from enheduanna.types.config.file import CliFileConfig
 from enheduanna.types.markdown_file import MarkdownFile
 from enheduanna.types.markdown_section import MarkdownSection
 
 from enheduanna.utils.days import get_end_of_week, get_start_of_week
+from enheduanna.utils.files import create_formatted_folder
 from enheduanna.utils.files import list_markdown_files, find_last_markdown_file
-from enheduanna.utils.markdown import section_generate_from_json
-from enheduanna.utils.markdown import rollup_section_generate_from_json
 from enheduanna.utils.markdown import generate_markdown_rollup
 
 CONFIG_DEFAULT = Path.home() / '.enheduanna.yml'
@@ -25,19 +22,6 @@ def get_config_options(config: dict) -> dict:
     config : Config dictionary
     '''
     return CliConfig.from_json(config)
-
-def create_weekly_folder(note_folder: Path, start: date, end: date, date_format: str) -> Path:
-    '''
-    Create weekly folder
-    note_folder : Note folder dir
-    start : Start date
-    end : End date
-    date_format : Date format for folder names
-    '''
-    note_folder.mkdir(exist_ok=True)
-    weekly_folder = note_folder / f'{start.strftime(date_format)}_{end.strftime(date_format)}'
-    weekly_folder.mkdir(exist_ok=True)
-    return weekly_folder
 
 def ensure_daily_file(weekly_folder: Path, today: date, date_format: str, new_sections: List[MarkdownSection],
                       last_markdown_file: MarkdownFile) -> Path:
@@ -105,7 +89,7 @@ def ready_file(context: click.Context):
     if last_file:
         last_file = MarkdownFile.from_file(last_file)
     # Get folder and file ready
-    weekly_folder = create_weekly_folder(context.obj['config'].file_config.note_folder, start, end, context.obj['config'].file_config.date_format)
+    weekly_folder = create_formatted_folder(context.obj['config'].file_config.note_folder, start, end, context.obj['config'].file_config.date_format)
     day_file = ensure_daily_file(weekly_folder, today, context.obj['config'].file_config.date_format, context.obj['config'].file_config.daily_file_sections, last_file)
     click.echo(f'Created note file {day_file}')
 

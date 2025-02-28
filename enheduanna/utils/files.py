@@ -1,9 +1,23 @@
+from datetime import date
 from pathlib import Path
 from re import match
 from typing import List, Union
 
 # Assume daily notes only have numbers in name
 MATCH_DAILY_NOTE = r'^([0-9-_]+).md$'
+
+def create_formatted_folder(folder_path: Path, start: date, end: date, date_format: str) -> Path:
+    '''
+    Create weekly folder
+    note_folder : Note folder dir
+    start : Start date
+    end : End date
+    date_format : Date format for folder names
+    '''
+    folder_path.mkdir(exist_ok=True)
+    formatted_folder = folder_path / f'{start.strftime(date_format)}_{end.strftime(date_format)}'
+    formatted_folder.mkdir(exist_ok=True)
+    return formatted_folder
 
 def list_markdown_files(file_dir: Path, only_include_daily_note: bool = True) -> List[Path]:
     '''
