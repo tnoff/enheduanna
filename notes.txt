@@ -1,0 +1,26 @@
+Should use the following jira types
+
+---
+  jira:
+    functions:
+      - type: search
+        name: My Tickets
+        jql: foo
+      - type: update-field
+        name: Update summary
+        field: summary
+        default_value: foo summary
+        require_input: true
+      - type: update-parent
+        name: update parent ticket
+        default_value: ABC-1234
+        require_input: false
+      - type: update-sprint
+        name: Update to current sprint
+        default_value: SRE Sprint 1
+    combos:
+      - name: list and update
+        functions:
+          - my-tickets
+          - update-field
+          - update-parent
