@@ -7,9 +7,9 @@ class CliJiraConfig:
     '''
     Cli config for jira options
     '''
-    server_url: str
-    user_email: str
-    user_token: str
+    server_url: str = None
+    user_email: str = None
+    user_token: str = None
 
     def __post_init__(self):
         self._client = None
