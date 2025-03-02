@@ -1,3 +1,4 @@
+from copy import deepcopy
 from json import dumps
 from typing import List, Tuple
 
@@ -50,7 +51,7 @@ def _gather_all_section_data(markdown_file: MarkdownFile, parent_section: Markdo
             if section.title == rollup_section.title and section.level == rollup_section.level:
                 if section.title not in rollup_mapping:
                     rollup_mapping[section.title] = {
-                        'section': section,
+                        'section': deepcopy(section),
                         'rollup': rollup_section,
                     }
                 else:
