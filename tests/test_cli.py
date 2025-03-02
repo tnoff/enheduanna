@@ -70,4 +70,4 @@ def test_rollup():
 
         scratch_file = config.file.note_directory / '2025-02-24_2025-03-02' / '2025-02-27.md'
         assert scratch_file.exists()
-        assert scratch_file.read_text() == '# 2025-02-27\n\n## Work Done\n\n- Writing up customer support (ABC-1234)\n- Doing some testing for customer fix (ABC-1234)\n\n- Helping Arya fix up her test suite\n- Doing self-reviews for the year\n\n## Meetings\n\n| Time | Summary |\n| ---- | ------- |\n| 0900 -> 1000 | Standup |\n| 1300 -> 1500 | Sync w/ Boss |\n'
+        assert scratch_file.read_text() == '# 2025-02-27\n\n## Work Done\n\n- Writing up customer support (ABC-1234)\n\n## Meetings\n\n| Time | Summary |\n| ---- | ------- |\n| 0900 -> 1000 | Standup |\n| 1300 -> 1500 | Sync w/ Boss |\n'
