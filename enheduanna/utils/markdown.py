@@ -43,6 +43,8 @@ def _gather_all_section_data(markdown_file: MarkdownFile, parent_section: Markdo
     '''
     doc_sections = []
     for section in parent_section.sections:
+        if section.title in ignore_sections:
+            continue
         match_found = False
         for rollup_section in rollup_sections:
             if section.title == rollup_section.title and section.level == rollup_section.level:
@@ -57,7 +59,7 @@ def _gather_all_section_data(markdown_file: MarkdownFile, parent_section: Markdo
                 continue
 
         if not match_found:
-            if section.level > 1 and section.title not in ignore_sections:
+            if section.level > 1:
                 doc_sections.append(section.title)
                 continue
             _gather_all_section_data(markdown_file, section, rollup_sections, ignore_sections, rollup_mapping, document_list)
@@ -90,3 +92,24 @@ def generate_markdown_rollup(markdown_files: List[MarkdownFile], rollup_sections
         section.group_contents(values['rollup'])
         new_sections.append(section)
     return new_sections, document_list
+
+def __remove_empty(markdown_file: MarkdownFile, parent_section: MarkdownSection) -> bool:
+    remove_sections = []
+    for section in parent_section.sections:
+        __remove_empty(markdown_file, section)
+        if section.is_empty():
+            remove_sections.append(section.title)
+
+    for remove in remove_sections:
+        parent_section.remove_section(remove)
+    return True
+
+def remove_empty_sections(markdown_files: List[MarkdownFile]) -> bool:
+    '''
+    Remove empty exections from markdown files
+
+    markdown_files : List of markdown files
+    '''
+    for mf in markdown_files:
+        __remove_empty(mf, mf.root_section)
+        mf.write()

@@ -8,6 +8,8 @@ from pydantic.dataclasses import dataclass
 
 from enheduanna.types.rollup_section import RollupSection
 
+ALPHANUMERIC_REGEX = r'[a-zA-Z0-9]'
+
 class MarkdownException(Exception):
     '''
     Generic class for exception errors
@@ -23,6 +25,13 @@ class MarkdownSection:
     level: int = Field(default=1)
     sections: list[Self] = Field(default_factory=list)
     carryover: bool = False
+
+    def is_empty(self) -> bool:
+        '''
+        Check if contents are empty of effectively empty
+        '''
+        matcher = search(ALPHANUMERIC_REGEX, self.contents)
+        return matcher == None and not self.sections
 
     def add_section(self, section: Self) -> bool:
         '''
