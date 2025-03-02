@@ -4,6 +4,7 @@ def get_start_of_week(day: date) -> date:
     '''
     Get start of week
     '''
+
     while True:
         if day.weekday() == 0:
             return day

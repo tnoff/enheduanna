@@ -208,7 +208,8 @@ Example config:
 
 ```
 ---
-date_format: %Y-%m-%d
+file:
+  date_format: %Y-%m-%d
 ```
 
 ### Note Folder
@@ -219,12 +220,13 @@ Example Config
 
 ```
 ---
-note_folder: /home/user/Notes
+file:
+  note_folder: /home/user/Notes
 ```
 
-### Sections
+### Daily Sections
 
-The default sections for the daily note markdown files. Each "MarkdownSection" should have the three following params:
+The default sections for the daily note markdown files. Each "MarkdownSection" should have the following params:
 
 | Param | Type | Description | 
 | ----- | ---- | ----------- |
@@ -240,20 +242,21 @@ Example config:
 
 ```
 ---
-sections:
-  - title: Work Done
-    contents: "- "
-    level: 2
-  - title: Meetings
-    contents: " Time | Meeting Name |\n| ---- | ------------ |\n| | |"
-    level: 2
-  - title: Follow Ups
-    contents: "- Follow Ups"
-    level: 2
-    carryover: true
-  - title: Scratch
-    contents: "- "
-    level: 2
+file:
+  daily_sections:
+    - title: Work Done
+      contents: "- "
+      level: 2
+    - title: Meetings
+      contents: " Time | Meeting Name |\n| ---- | ------------ |\n| | |"
+      level: 2
+    - title: Follow Ups
+      contents: "- Follow Ups"
+      level: 2
+      carryover: true
+    - title: Scratch
+      contents: "- "
+      level: 2
 ```
 
 ### Rollup Sections
@@ -266,9 +269,10 @@ Example config:
 
 ```
 ---
-rollup_sections:
-  - title: Work Done
-    level: 2
-    regex: "\\((?P<ticket>[A-Za-z]+-[0-9]+)\\)"
-    groupBy: ticket
+file:
+  rollup_sections:
+    - title: Work Done
+      level: 2
+      regex: "\\((?P<ticket>[A-Za-z]+-[0-9]+)\\)"
+      groupBy: ticket
 ```

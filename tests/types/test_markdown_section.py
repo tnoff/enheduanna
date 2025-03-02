@@ -83,3 +83,9 @@ def test_markdown_section_group_contents():
     m.group_contents(r)
     assert m.contents == 'generic contents'
     assert m.sections[0].contents == '- Work on ticket (ABC-1234)\n- More work on the original ticket (ABC-1234)\n\n- Work on another ticket (XYZ-234)\n\nRandom input'
+
+def test_check_contents_empty():
+    m = MarkdownSection('2025-02-16', 'generic contents')
+    assert m.is_empty() == False
+    m = MarkdownSection('2025-02-16', '- ')
+    assert m.is_empty() == True
