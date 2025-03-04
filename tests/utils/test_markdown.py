@@ -4,9 +4,9 @@ from tempfile import TemporaryDirectory, NamedTemporaryFile
 from pydantic_core._pydantic_core import ValidationError
 from pytest import raises
 
-from enheduanna.types.markdown_file import MarkdownFile
-from enheduanna.types.markdown_section import MarkdownSection
-from enheduanna.types.rollup_section import RollupSection
+from enheduanna.types.markdown.markdown_file import MarkdownFile
+from enheduanna.types.markdown.markdown_section import MarkdownSection
+from enheduanna.types.markdown.rollup_section import RollupSection
 from enheduanna.utils.markdown import section_generate_from_json
 from enheduanna.utils.markdown import rollup_section_generate_from_json
 from enheduanna.utils.markdown import generate_markdown_rollup

@@ -1,7 +1,7 @@
 from pytest import raises
 
-from enheduanna.types.markdown_section import MarkdownSection, MarkdownException
-from enheduanna.types.rollup_section import RollupSection
+from enheduanna.types.markdown.markdown_section import MarkdownSection, MarkdownException
+from enheduanna.types.markdown.rollup_section import RollupSection
 
 def test_markdown_invalid_section():
     m = MarkdownSection('2025-02-16', 'generic contents')
@@ -77,12 +77,17 @@ def test_markdown_section_merge():
 def test_markdown_section_group_contents():
     m = MarkdownSection('2025-02-16', 'generic contents')
     m1 = MarkdownSection('Work Done', '- Work on ticket (ABC-1234)\n- Work on another ticket (XYZ-234)\n- More work on the original ticket (ABC-1234)\nRandom input', level=2)
+    m2 = MarkdownSection('Follow Ups', '- Generic follow ups', level=2)
     m.add_section(m1)
+    m.add_section(m2)
 
     r = RollupSection('Work Done', regex='\\((?P<ticket>[A-Za-z]+-[0-9]+)\\)', groupBy='ticket')
+    r2 = RollupSection('Follow Ups')
     m.group_contents(r)
+    m.group_contents(r2)
     assert m.contents == 'generic contents'
     assert m.sections[0].contents == '- Work on ticket (ABC-1234)\n- More work on the original ticket (ABC-1234)\n\n- Work on another ticket (XYZ-234)\n\nRandom input'
+    assert m.sections[1].contents == '- Generic follow ups'
 
 def test_check_contents_empty():
     m = MarkdownSection('2025-02-16', 'generic contents')

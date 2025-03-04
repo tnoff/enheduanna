@@ -1,7 +1,7 @@
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-from enheduanna.types.markdown_file import MarkdownFile
+from enheduanna.types.markdown.markdown_file import MarkdownFile
 
 def test_markdown_section_from_text():
     input_text = '''# 2025-01-01

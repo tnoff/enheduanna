@@ -2,9 +2,9 @@ from copy import deepcopy
 from json import dumps
 from typing import List, Tuple
 
-from enheduanna.types.markdown_file import MarkdownFile
-from enheduanna.types.markdown_section import MarkdownSection
-from enheduanna.types.rollup_section import RollupSection
+from enheduanna.types.markdown.markdown_file import MarkdownFile
+from enheduanna.types.markdown.markdown_section import MarkdownSection
+from enheduanna.types.markdown.rollup_section import RollupSection
 
 def section_generate_from_json(data_input: List[dict]) -> List[MarkdownSection]:
     '''

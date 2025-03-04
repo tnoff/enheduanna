@@ -3,7 +3,7 @@ from typing import List
 
 from pydantic.dataclasses import dataclass
 
-from enheduanna.types.markdown_section import MarkdownSection
+from enheduanna.types.markdown.markdown_section import MarkdownSection
 
 @dataclass
 class MarkdownFile:
