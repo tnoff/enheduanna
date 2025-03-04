@@ -119,12 +119,13 @@ class MarkdownSection:
         for item in self.contents.split('\n'):
             if not item:
                 continue
-            matcher = search(rollup_section.regex, item)
-            if matcher:
-                key = matcher.group(rollup_section.groupBy)
-                matching.setdefault(key, [])
-                matching[key].append(item)
-                continue
+            if rollup_section.regex:
+                matcher = search(rollup_section.regex, item)
+                if matcher:
+                    key = matcher.group(rollup_section.groupBy)
+                    matching.setdefault(key, [])
+                    matching[key].append(item)
+                    continue
             non_matching.append(item)
         new_contents = ''
         for _key, value in matching.items():
