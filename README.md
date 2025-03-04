@@ -212,16 +212,28 @@ file:
   date_format: %Y-%m-%d
 ```
 
-### Note Folder
+### Note Directory
 
-Override the note folder all weekly directories are placed in.
+Override the note directory all weekly directories are placed in.
 
 Example Config
 
 ```
 ---
 file:
-  note_folder: /home/user/Notes
+  note_directory: /home/user/Notes
+```
+
+### Document Directory
+
+Override the document directory where rollup docs are placed in.
+
+Example Config
+
+```
+---
+file:
+  document_directory: /home/user/Documents
 ```
 
 ### Daily Sections
