@@ -1,5 +1,5 @@
 from pathlib import Path
-from tempfile import NamedTemporaryFile, TemporaryDirectory
+from tempfile import TemporaryDirectory
 
 from enheduanna.utils.files import list_markdown_files, find_last_markdown_file
 

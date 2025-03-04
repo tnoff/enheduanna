@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-from datetime import date
 from distutils.dir_util import copy_tree
 from json import dumps
 from tempfile import TemporaryDirectory, NamedTemporaryFile
@@ -8,15 +7,12 @@ from click.testing import CliRunner
 from freezegun import freeze_time
 from pathlib import Path
 from pydantic import RootModel
-from pytest import raises
 from yaml import dump
 
 from enheduanna.cli import main
 
 from enheduanna.types.config.config import Config
 from enheduanna.types.config.file import FileConfig
-from enheduanna.types.markdown_file import MarkdownFile
-from enheduanna.utils.markdown import section_generate_from_json
 
 DATA_PATH = Path(__file__).parent / 'data'
 

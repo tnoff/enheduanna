@@ -1,7 +1,7 @@
 from pytest import raises
 
-from enheduanna.types.markdown_section import MarkdownSection, MarkdownException
-from enheduanna.types.rollup_section import RollupSection
+from enheduanna.types.markdown.markdown_section import MarkdownSection, MarkdownException
+from enheduanna.types.markdown.rollup_section import RollupSection
 
 def test_markdown_invalid_section():
     m = MarkdownSection('2025-02-16', 'generic contents')

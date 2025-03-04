@@ -6,8 +6,8 @@ from pydantic import model_validator
 from pydantic.dataclasses import dataclass
 
 from enheduanna.defaults import NOTE_DIR_DEFAULT, DOCUMENT_DIR_DEFAULT, DATE_OUTPUT_FORMAT_DEFAULT
-from enheduanna.types.markdown_section import MarkdownSection
-from enheduanna.types.rollup_section import RollupSection
+from enheduanna.types.markdown.markdown_section import MarkdownSection
+from enheduanna.types.markdown.rollup_section import RollupSection
 
 DAILY_SECTIONS_DEFAULT = [
     MarkdownSection('Work Done', '- ', level=2),

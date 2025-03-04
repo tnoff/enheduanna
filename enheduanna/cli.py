@@ -6,8 +6,8 @@ import click
 
 from enheduanna.defaults import CONFIG_DEFAULT
 from enheduanna.types.config.config import Config
-from enheduanna.types.markdown_file import MarkdownFile
-from enheduanna.types.markdown_section import MarkdownSection
+from enheduanna.types.markdown.markdown_file import MarkdownFile
+from enheduanna.types.markdown.markdown_section import MarkdownSection
 
 from enheduanna.utils.days import get_end_of_week, get_start_of_week
 from enheduanna.utils.files import list_markdown_files, find_last_markdown_file

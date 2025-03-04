@@ -1,7 +1,7 @@
 from pydantic import ValidationError
 from pytest import raises
 
-from enheduanna.types.rollup_section import RollupSection
+from enheduanna.types.markdown.rollup_section import RollupSection
 
 def test_validators():
     with raises(ValidationError) as e:

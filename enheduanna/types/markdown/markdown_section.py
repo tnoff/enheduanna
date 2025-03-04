@@ -6,7 +6,7 @@ from pydantic import Field
 from pydantic import TypeAdapter
 from pydantic.dataclasses import dataclass
 
-from enheduanna.types.rollup_section import RollupSection
+from enheduanna.types.markdown.rollup_section import RollupSection
 
 ALPHANUMERIC_REGEX = r'[a-zA-Z0-9]'
 
