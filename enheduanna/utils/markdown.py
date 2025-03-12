@@ -1,32 +1,9 @@
 from copy import deepcopy
-from json import dumps
 from typing import List, Tuple
 
 from enheduanna.types.markdown.markdown_file import MarkdownFile
 from enheduanna.types.markdown.markdown_section import MarkdownSection
 from enheduanna.types.markdown.rollup_section import RollupSection
-
-def section_generate_from_json(data_input: List[dict]) -> List[MarkdownSection]:
-    '''
-    Generate MarkdownSection input from list of dicts
-
-    data_input : List of dicts with Markdown Section input
-    '''
-    return_data = []
-    for section in data_input:
-        return_data.append(MarkdownSection.from_json(dumps(section)))
-    return return_data
-
-def rollup_section_generate_from_json(data_input: List[dict]) -> List[RollupSection]:
-    '''
-    Generate RollupSections from list of strings
-
-    data_input : List of strings for titles
-    '''
-    return_data = []
-    for section in data_input:
-        return_data.append(RollupSection.from_json(dumps(section)))
-    return return_data
 
 def _gather_all_section_data(markdown_file: MarkdownFile, parent_section: MarkdownSection,
                              rollup_sections: List[str], ignore_sections: List[str],

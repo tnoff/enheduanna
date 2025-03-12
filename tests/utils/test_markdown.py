@@ -7,31 +7,8 @@ from pytest import raises
 from enheduanna.types.markdown.markdown_file import MarkdownFile
 from enheduanna.types.markdown.markdown_section import MarkdownSection
 from enheduanna.types.markdown.rollup_section import RollupSection
-from enheduanna.utils.markdown import section_generate_from_json
-from enheduanna.utils.markdown import rollup_section_generate_from_json
 from enheduanna.utils.markdown import generate_markdown_rollup
 from enheduanna.utils.markdown import remove_empty_sections
-
-
-def test_validation_of_section_schema():
-    with raises(ValidationError) as e:
-        section_generate_from_json({'sections': 'foo'})
-    assert '1 validation error for MarkdownSection' in str(e.value)
-    with raises(ValidationError) as e:
-        section_generate_from_json([
-                {
-                    'foo': 'bar',
-                    'title': 'bar',
-                }
-            ])
-    assert '1 validation error for MarkdownSection' in str(e.value)
-    valid = section_generate_from_json([{"title": "foo", "contents": "bar"}])
-    assert valid[0].title == "foo"
-    assert valid[0].contents == "bar"
-
-def test_validation_of_rollup_schema():
-    valid = rollup_section_generate_from_json([{"title": "foo"}])
-    assert valid[0].title == "foo"
 
 def test_combine_markdown_sections():
     ms1 = MarkdownSection('2025-02-10', '')
