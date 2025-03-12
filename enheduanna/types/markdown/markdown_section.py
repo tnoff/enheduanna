@@ -6,7 +6,7 @@ from pydantic import Field
 from pydantic import TypeAdapter
 from pydantic.dataclasses import dataclass
 
-from enheduanna.types.markdown.rollup_section import RollupSection
+from enheduanna.types.markdown.markdown_merge_setting import MarkdownMergeSetting
 
 ALPHANUMERIC_REGEX = r'[a-zA-Z0-9]'
 
@@ -119,24 +119,24 @@ class MarkdownSection:
             self.add_section(section)
         return True
 
-    def group_contents(self, rollup_section: RollupSection, force_grouping: bool = False) -> bool:
+    def group_contents(self, merge_setting: MarkdownMergeSetting, force_grouping: bool = False) -> bool:
         '''
         Group contents by a rollup section regex
 
-        rollup_section : RollupSection to group by
+        merge_setting : MarkdownMergeSetting to group by
         force_grouping : Force grouping on subsections
         '''
-        if not force_grouping and not rollup_section.regex and self.title != rollup_section.title:
+        if not force_grouping and not merge_setting.regex and self.title != merge_setting.title:
             return False
         matching = {}
         non_matching = []
         for item in self.contents.split('\n'):
             if not item:
                 continue
-            if rollup_section.regex:
-                matcher = search(rollup_section.regex, item)
+            if merge_setting.regex:
+                matcher = search(merge_setting.regex, item)
                 if matcher:
-                    key = matcher.group(rollup_section.groupBy)
+                    key = matcher.group(merge_setting.groupBy)
                     matching.setdefault(key, [])
                     matching[key].append(item)
                     continue
@@ -151,7 +151,7 @@ class MarkdownSection:
         new_contents = new_contents.rstrip()
         self.contents = new_contents
         for section in self.sections:
-            section.group_contents(rollup_section, force_grouping=True)
+            section.group_contents(merge_setting, force_grouping=True)
         return True
 
     def write(self) -> str:

@@ -271,9 +271,9 @@ file:
       level: 2
 ```
 
-### Rollup Sections
+### Markdown Merge Setting
 
-Rollup sections that determine which sections are combined together during the `rollup` command. A better summary is above, but you can set `regex` and `groupBy` options to group common bits of content in the sections.
+Markdown Merge Settings determine which sections are combined together during the `rollup` command. A better summary is above, but you can set `regex` and `groupBy` options to group common bits of content in the sections.
 
 Only the `title` is required, the `regex` and `groupBy` are optional. You can also override the `level` that is combined, meaning the section level of the rollup section, by default this is set to 2.
 
@@ -282,7 +282,7 @@ Example config:
 ```
 ---
 file:
-  rollup_sections:
+  markdown_merge_settings:
     - title: Work Done
       level: 2
       regex: "\\((?P<ticket>[A-Za-z]+-[0-9]+)\\)"

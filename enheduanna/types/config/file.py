@@ -7,7 +7,7 @@ from pydantic.dataclasses import dataclass
 
 from enheduanna.defaults import NOTE_DIR_DEFAULT, DOCUMENT_DIR_DEFAULT, DATE_OUTPUT_FORMAT_DEFAULT
 from enheduanna.types.markdown.markdown_section import MarkdownSection
-from enheduanna.types.markdown.rollup_section import RollupSection
+from enheduanna.types.markdown.markdown_merge_setting import MarkdownMergeSetting
 
 DAILY_SECTIONS_DEFAULT = [
     MarkdownSection('Work Done', '- ', level=2),
@@ -16,8 +16,8 @@ DAILY_SECTIONS_DEFAULT = [
     MarkdownSection('Scratch', '- ', level=2)
 ]
 
-ROLLUP_SECTIONS_DEFAULT = [
-    RollupSection('Work Done', regex='\\((?P<ticket>[A-Za-z]+-[0-9]+)\\)', groupBy='ticket', level=2)
+MARKDOWN_MERGE_SETTINGS_DEFAULT = [
+    MarkdownMergeSetting('Work Done', regex='\\((?P<ticket>[A-Za-z]+-[0-9]+)\\)', groupBy='ticket', level=2)
 ]
 
 @dataclass
@@ -30,7 +30,7 @@ class FileConfig:
     date_output_format: str = DATE_OUTPUT_FORMAT_DEFAULT
 
     daily_sections: List[MarkdownSection] = Field(default_factory=list)
-    rollup_sections: List[RollupSection] = Field(default_factory=list)
+    markdown_merge_settings: List[MarkdownMergeSetting] = Field(default_factory=list)
 
     @model_validator(mode='after')
     def validate_daily_sections(self) -> Self:
@@ -42,10 +42,10 @@ class FileConfig:
         return self
 
     @model_validator(mode='after')
-    def validate_rollup_sections(self) -> Self:
+    def validate_markdown_merge_settings(self) -> Self:
         '''
         Validate rollups bits
         '''
-        if not self.rollup_sections:
-            self.rollup_sections = ROLLUP_SECTIONS_DEFAULT
+        if not self.markdown_merge_settings:
+            self.markdown_merge_settings = MARKDOWN_MERGE_SETTINGS_DEFAULT
         return self

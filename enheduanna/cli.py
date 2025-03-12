@@ -96,8 +96,8 @@ def rollup(context: click.Context, file_dir: str, title, rollup_name: str):
     for path in list_markdown_files(file_dir):
         markdown_files.append(MarkdownFile.from_file(path))
     # Ignore sections set automatically but not in rollup
-    ignore_sections = set(i.title for i in context.obj.file.daily_sections) - set([i.title for i in context.obj.file.rollup_sections]) #pylint:disable=consider-using-set-comprehension
-    combos, documents = generate_markdown_rollup(markdown_files, context.obj.file.rollup_sections, ignore_sections)
+    ignore_sections = set(i.title for i in context.obj.file.daily_sections) - set([i.title for i in context.obj.file.markdown_merge_settings]) #pylint:disable=consider-using-set-comprehension
+    combos, documents = generate_markdown_rollup(markdown_files, context.obj.file.markdown_merge_settings, ignore_sections)
     new_document = MarkdownSection(title, '')
     for section in combos:
         section.level = 2

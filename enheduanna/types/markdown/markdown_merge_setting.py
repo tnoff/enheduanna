@@ -4,9 +4,9 @@ from pydantic import TypeAdapter, model_validator
 from pydantic.dataclasses import dataclass
 
 @dataclass
-class RollupSection:
+class MarkdownMergeSetting:
     '''
-    RollupSections for Markdown
+    Markdown Merge Setting
     '''
     title: str
     level: int = 2
@@ -30,4 +30,4 @@ class RollupSection:
     def __str__(self):
         return self.title
 
-RollupSection.from_json = TypeAdapter(RollupSection).validate_json
+MarkdownMergeSetting.from_json = TypeAdapter(MarkdownMergeSetting).validate_json

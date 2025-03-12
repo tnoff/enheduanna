@@ -6,7 +6,7 @@ from pytest import raises
 
 from enheduanna.types.markdown.markdown_file import MarkdownFile
 from enheduanna.types.markdown.markdown_section import MarkdownSection
-from enheduanna.types.markdown.rollup_section import RollupSection
+from enheduanna.types.markdown.markdown_merge_setting import MarkdownMergeSetting
 from enheduanna.utils.markdown import generate_markdown_rollup
 
 def test_combine_markdown_sections():
@@ -22,7 +22,7 @@ def test_combine_markdown_sections():
     ms3.add_section(MarkdownSection('Easy Work', '- Work on ticket (ABC-1234)\n-Work on another ticket (XYZ-1234)', level=3))
     ms2.add_section(ms3)
 
-    rs1 = RollupSection('Work Done', regex='\\((?P<ticket>[A-Za-z]+-[0-9]+)\\)', groupBy='ticket')
+    rs1 = MarkdownMergeSetting('Work Done', regex='\\((?P<ticket>[A-Za-z]+-[0-9]+)\\)', groupBy='ticket')
 
     with TemporaryDirectory() as tmpdir:
         dir_path = Path(tmpdir) / '2025-02-10_2025-02-16'
