@@ -94,3 +94,18 @@ def test_check_contents_empty():
     assert m.is_empty() == False
     m = MarkdownSection('2025-02-16', '- ')
     assert m.is_empty() == True
+
+def test_clean_sections():
+    m = MarkdownSection('2025-03-11', '', level=1)
+    m1 = MarkdownSection('Follow Ups', '', level=2)
+    m2 = MarkdownSection('Short Term', '- ', level=3)
+    m3 = MarkdownSection('Long Term', '- ', level=3)
+    m1.add_section(m2)
+    m1.add_section(m3)
+
+    m4 = MarkdownSection('Generic Section', 'some generic contents', level=2)
+    m.add_section(m1)
+    m.add_section(m4)
+
+    m.clean_sections()
+    assert m.write() == '# 2025-03-11\n\n## Generic Section\n\nsome generic contents\n'

@@ -11,7 +11,7 @@ from enheduanna.types.markdown.markdown_section import MarkdownSection
 
 from enheduanna.utils.days import get_end_of_week, get_start_of_week
 from enheduanna.utils.files import list_markdown_files, find_last_markdown_file
-from enheduanna.utils.markdown import generate_markdown_rollup, remove_empty_sections
+from enheduanna.utils.markdown import generate_markdown_rollup
 
 def create_weekly_folder(note_folder: Path, start: date, end: date, date_format: str) -> Path:
     '''
@@ -112,7 +112,9 @@ def rollup(context: click.Context, file_dir: str, title, rollup_name: str):
         click.echo(f'Writing document to file {new_path}')
     # Clean up files at the end
     click.echo(f'Cleaning up files in dir {file_dir}')
-    remove_empty_sections(markdown_files)
+    for f in markdown_files:
+        f.clean()
+        f.write()
 
 if __name__ == '__main__':
     main(obj={}) # pylint:disable=no-value-for-parameter

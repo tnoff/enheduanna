@@ -33,6 +33,20 @@ class MarkdownSection:
         matcher = search(ALPHANUMERIC_REGEX, self.contents)
         return matcher == None and not self.sections
 
+    def clean_sections(self) -> bool:
+        '''
+        Remove empty sections
+        '''
+        remove_sections = []
+        for section in self.sections:
+            section.clean_sections()
+            if section.is_empty():
+                remove_sections.append(section.title)
+
+        for section in remove_sections:
+            self.remove_section(section)
+        return True
+
     def add_section(self, section: Self) -> bool:
         '''
         Add a new section

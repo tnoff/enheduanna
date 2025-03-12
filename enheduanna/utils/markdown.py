@@ -70,24 +70,3 @@ def generate_markdown_rollup(markdown_files: List[MarkdownFile], rollup_sections
         section.group_contents(values['rollup'])
         new_sections.append(section)
     return new_sections, document_list
-
-def __remove_empty(markdown_file: MarkdownFile, parent_section: MarkdownSection) -> bool:
-    remove_sections = []
-    for section in parent_section.sections:
-        __remove_empty(markdown_file, section)
-        if section.is_empty():
-            remove_sections.append(section.title)
-
-    for remove in remove_sections:
-        parent_section.remove_section(remove)
-    return True
-
-def remove_empty_sections(markdown_files: List[MarkdownFile]) -> bool:
-    '''
-    Remove empty exections from markdown files
-
-    markdown_files : List of markdown files
-    '''
-    for mf in markdown_files:
-        __remove_empty(mf, mf.root_section)
-        mf.write()

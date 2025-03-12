@@ -8,7 +8,6 @@ from enheduanna.types.markdown.markdown_file import MarkdownFile
 from enheduanna.types.markdown.markdown_section import MarkdownSection
 from enheduanna.types.markdown.rollup_section import RollupSection
 from enheduanna.utils.markdown import generate_markdown_rollup
-from enheduanna.utils.markdown import remove_empty_sections
 
 def test_combine_markdown_sections():
     ms1 = MarkdownSection('2025-02-10', '')
@@ -51,23 +50,3 @@ def test_combine_markdown_sections():
 
         assert len(ms1.sections) == 2
         assert path1.read_text() == '# 2025-02-10\n\n## Work Done\n\n- Some example ticket work (ABC-1234)\nRandom input\n\n## Follow Ups\n\n- Some example followup\n'
-
-def test_remove_sections():
-    m = MarkdownSection('2025-03-01', '', level=1)
-    m1 = MarkdownSection('Scratch', '-', level=2)
-    m2 = MarkdownSection('Work Done', '', level=2)
-    m21 = MarkdownSection('Easy Stuff', '- Got plenty of easy stuff', level=3)
-    m3 = MarkdownSection('Empty with empty sub', '', level=2)
-    m31 = MarkdownSection('Empty sub', '', level=3)
-    m3.add_section(m31)
-    m.add_section(m1)
-    m2.add_section(m21)
-    m.add_section(m2)
-    m.add_section(m3)
-
-    with NamedTemporaryFile() as tmp:
-        path = Path(tmp.name)
-        mf1 = MarkdownFile(path, m)
-        remove_empty_sections([mf1])
-
-        assert path.read_text() == '# 2025-03-01\n\n## Work Done\n\n### Easy Stuff\n\n- Got plenty of easy stuff\n'

@@ -13,6 +13,12 @@ class MarkdownFile:
     file_path: Path
     root_section: MarkdownSection
 
+    def clean(self) -> bool:
+        '''
+        Clean file sections and remove empty ones
+        '''
+        return self.root_section.clean_sections()
+
     def write(self) -> bool:
         '''
         Write latest root section to file
