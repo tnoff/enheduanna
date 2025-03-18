@@ -5,6 +5,7 @@ from pydantic.dataclasses import dataclass
 from pyaml_env import parse_config
 
 from enheduanna.types.config.file import FileConfig
+from enheduanna.types.config.conditions import ConditionsConfig
 
 @dataclass
 class Config:
@@ -12,6 +13,7 @@ class Config:
     Config options
     '''
     file: FileConfig
+    condition: ConditionsConfig
 
 def from_yaml(file_path: Path) -> Config:
     '''
@@ -25,6 +27,8 @@ def from_yaml(file_path: Path) -> Config:
 
     file_config_opts = config.get('file', {})
     file_config = FileConfig(**file_config_opts)
+    conditions_config_opts = config.get('conditions', {})
+    conditions_config = ConditionsConfig(**conditions_config_opts)
 
     final_config = Config(file_config)
     return final_config
