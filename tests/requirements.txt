@@ -3,5 +3,5 @@ pytest==8.3.5
 pytest-cov==6.0.0
 pytest-freezegun==0.4.2
 # Currently required for pytest-freezegun, can remove once they have that fixed
-setuptools==76.0.0
+setuptools==77.0.3
 tox==4.24.2
