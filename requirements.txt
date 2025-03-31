@@ -2,4 +2,4 @@ click==8.1.8
 jsonschema==4.23.0
 pathlib==1.0.1
 pyaml_env==1.2.2
-pydantic==2.10.6
+pydantic==2.11.1
