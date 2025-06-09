@@ -10,8 +10,9 @@ from enheduanna.types.markdown.markdown_file import MarkdownFile
 from enheduanna.types.markdown.markdown_section import MarkdownSection
 
 from enheduanna.utils.days import get_end_of_week, get_start_of_week
-from enheduanna.utils.files import list_markdown_files, find_last_markdown_file
+from enheduanna.utils.files import list_markdown_files, find_last_markdown_file, normalize_file_name
 from enheduanna.utils.markdown import generate_markdown_rollup, remove_empty_sections
+
 
 def create_weekly_folder(note_folder: Path, start: date, end: date, date_format: str) -> Path:
     '''
@@ -106,7 +107,7 @@ def rollup(context: click.Context, file_dir: str, title, rollup_name: str):
     new_path.write_text(new_document.write())
     click.echo(f'Rollup data written to file {new_path}')
     for document in documents:
-        new_path = context.obj.file.document_directory / f'{document.title}.md'
+        new_path = context.obj.file.document_directory / f'{normalize_file_name(document.title)}.md'
         new_file = MarkdownFile(new_path, document)
         new_file.write()
         click.echo(f'Writing document to file {new_path}')

@@ -1,7 +1,7 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from enheduanna.utils.files import list_markdown_files, find_last_markdown_file
+from enheduanna.utils.files import normalize_file_name, list_markdown_files, find_last_markdown_file
 
 def test_list_files():
     with TemporaryDirectory(prefix='a') as tmpdir:
@@ -24,3 +24,8 @@ def test_list_files():
         assert len(files) == 3
         file = find_last_markdown_file(Path(tmpdir), only_include_daily_note=False)
         assert file == tmp3
+
+def test_normalize_filename():
+    assert normalize_file_name('foo') == 'foo'
+    assert normalize_file_name('temp.foo') == 'temp.foo'
+    assert normalize_file_name('go giants!') == 'go giants_'
