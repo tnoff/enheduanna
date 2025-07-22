@@ -11,7 +11,7 @@ from yaml import dump
 
 from enheduanna.cli import main
 
-from enheduanna.types.config.config import Config
+from enheduanna.types.config import Config
 from enheduanna.types.config.file import FileConfig
 
 DATA_PATH = Path(__file__).parent / 'data'
@@ -23,7 +23,7 @@ def temp_config():
         with TemporaryDirectory() as note_dir:
             with TemporaryDirectory() as doc_dir:
                 file_config = FileConfig(note_directory=note_dir, document_directory=doc_dir)
-                config = Config(file_config)
+                config = Config(file_config, {})
                 config_path.write_text(dump(RootModel[Config](config).model_dump_json()))
                 yield config_path, config
 

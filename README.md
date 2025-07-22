@@ -1,6 +1,6 @@
 # Enheduanna
 
-Command line tool for creating daily note files in Markdown. Organizes the daily notes into weekly directories, and has functions to "rollup" into weekly summaries and create additional "documentation" files from these notes.
+Command line tool for creating daily note files in Markdown. Organizes the daily notes into sub-directories, and has functions to "rollup" multiple days into summaries and create additional "documentation" files from these notes.
 
 Useful for keeping track of work done throughout the week, tracking follow up items, and starting proper documentation from your notes. In particular helps with keeping track of your work throughout the year/quarter for when you do self-reviews or need to update your resume.
 
@@ -20,14 +20,13 @@ $ pip install enheduanna/
 Comes with two commands to start:
 
 - `enheduanna ready-file` Creates the daily note file for today
-- `enheduanna rollup` Rolls up the daily notes into weekly summaries and other documentation.
+- `enheduanna rollup` Rolls up the daily notes into summaries and other documentation.
 
 Run `enheduanna --help` to see all options.
 
 ## Daily Note File
 
-The `ready-file` command will create a markdown file for today's notes. The note file will be named for the current day, such as `2025-01-21.md`. The file will be placed in a directory named for the current week. 
-
+The `ready-file` command will create a markdown file for today's notes. The note file will be named for the current day, such as `2025-01-21.md`. By default, the file will be placed in a sub-directory for the current week, but this can be configured to be a sub-directory for the entire month. 
 
 The format will look like this:
 
@@ -121,7 +120,7 @@ The contents of the `2025-01-23.md` file will also be updated to remove the `Fol
 
 ## Rollups
 
-Use the `rollup` command against a weekly note directory to roll up all of the daily note files in that directory into a `summary.md` file in that same directory.
+Use the `rollup` command against a note directory to roll up all of the daily note files in that directory into a `summary.md` file in that same directory.
 
 By default the `Work Done` section will be combined together and placed into the new `summary.md` file.
 
@@ -214,7 +213,7 @@ file:
 
 ### Note Directory
 
-Override the note directory all weekly directories are placed in.
+Override the note directory all parent directories are placed in.
 
 Example Config
 
@@ -287,4 +286,13 @@ file:
       level: 2
       regex: "\\((?P<ticket>[A-Za-z]+-[0-9]+)\\)"
       groupBy: ticket
+```
+
+### Collation Settings
+
+You can configure whether you want the sub-directories created to be on a per week or per month basis. The accepted values here are `weekly` and `monthly`.
+
+```
+collation:
+  type: monthly
 ```
