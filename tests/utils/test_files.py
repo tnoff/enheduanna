@@ -20,9 +20,9 @@ def test_list_files():
         assert file == tmp2
 
         # Test with include non days
-        files = list_markdown_files(Path(tmpdir), only_include_daily_note=False)
+        files = list_markdown_files(Path(tmpdir), only_include_entry=False)
         assert len(files) == 3
-        file = find_last_markdown_file(Path(tmpdir), only_include_daily_note=False)
+        file = find_last_markdown_file(Path(tmpdir), only_include_entry=False)
         assert file == tmp3
 
 def test_normalize_filename():

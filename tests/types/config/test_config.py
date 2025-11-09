@@ -7,29 +7,29 @@ from enheduanna.types.config import Config
 def test_load_yaml_basic_file():
     test_data = '''---
 file:
-  note_directory: /home/user/foo
+  entries_directory: /home/user/foo
 '''
     with NamedTemporaryFile() as tmp:
         path = Path(tmp.name)
         path.write_text(test_data)
         c = Config.from_yaml(path)
-        assert c.file.note_directory == Path('/home/user/foo')
+        assert c.file.entries_directory == Path('/home/user/foo')
 
-def test_load_yaml_daily_sections():
+def test_load_yaml_entry_sections():
     test_data = '''---
 file:
-  daily_sections:
+  entry_sections:
     - title: Work Done
       contents: foo bar
       level: 2
-      carryover: true
+      rollover: true
 '''
     with NamedTemporaryFile() as tmp:
         path = Path(tmp.name)
         path.write_text(test_data)
         c = Config.from_yaml(path)
-        assert c.file.daily_sections[0].title == 'Work Done'
-        assert c.file.daily_sections[0].contents == 'foo bar'
+        assert c.file.entry_sections[0].title == 'Work Done'
+        assert c.file.entry_sections[0].contents == 'foo bar'
 
 def test_collation_type():
     test_data = '''---
