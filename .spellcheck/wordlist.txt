@@ -27,3 +27,7 @@ groupBy
 24th
 prometheus
 runbook
+subfolder
+jpeg
+jpg
+png
