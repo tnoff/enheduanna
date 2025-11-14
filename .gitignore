@@ -6,3 +6,4 @@ hathor/plugins/
 build/
 *egg-info*
 .tox/
+venv/

@@ -7,13 +7,13 @@ from enheduanna.types.config import Config
 def test_load_yaml_basic_file():
     test_data = '''---
 file:
-  entries_directory: /home/user/foo
+  entries_folder: /home/user/foo
 '''
     with NamedTemporaryFile() as tmp:
         path = Path(tmp.name)
         path.write_text(test_data)
         c = Config.from_yaml(path)
-        assert c.file.entries_directory == Path('/home/user/foo')
+        assert c.file.entries_folder == Path('/home/user/foo')
 
 def test_load_yaml_entry_sections():
     test_data = '''---

@@ -23,7 +23,7 @@ def temp_config():
         config_path = Path(tmp_config.name)
         with TemporaryDirectory() as note_dir:
             with TemporaryDirectory() as doc_dir:
-                file_config = FileConfig(entries_directory=note_dir, document_directory=doc_dir)
+                file_config = FileConfig(entries_folder=note_dir, document_folder=doc_dir)
                 config = Config(file_config, {})
                 config_path.write_text(dump(RootModel[Config](config).model_dump_json()))
                 yield config_path, config
@@ -34,7 +34,7 @@ def temp_config_with_sections(sections):
         config_path = Path(tmp_config.name)
         with TemporaryDirectory() as note_dir:
             with TemporaryDirectory() as doc_dir:
-                file_config = FileConfig(entries_directory=note_dir, document_directory=doc_dir, entry_sections=sections)
+                file_config = FileConfig(entries_folder=note_dir, document_folder=doc_dir, entry_sections=sections)
                 config = Config(file_config, {})
                 config_path.write_text(dump(RootModel[Config](config).model_dump_json()))
                 yield config_path, config
@@ -43,15 +43,15 @@ def temp_config_with_sections(sections):
 def test_new_entry():
     data_dir = DATA_PATH / '2025-02-24_2025-03-02'
     with temp_config() as (config_file, config):
-        copy_tree(data_dir, config.file.entries_directory / '2025-02-24_2025-03-02')
+        copy_tree(data_dir, config.file.entries_folder / '2025-02-24_2025-03-02')
         runner = CliRunner()
         result = runner.invoke(main, ['-c', config_file, 'new-entry'])
-        assert result.output == f'Created entry file {config.file.entries_directory}/2025-02-24_2025-03-02/2025-03-01.md\n'
-        expected_path = config.file.entries_directory / '2025-02-24_2025-03-02' / '2025-03-01.md'
+        assert result.output == f'Created entry file {config.file.entries_folder}/2025-02-24_2025-03-02/2025-03-01.md\n'
+        expected_path = config.file.entries_folder / '2025-02-24_2025-03-02' / '2025-03-01.md'
         assert expected_path.exists()
         assert expected_path.read_text() == '# 2025-03-01\n\n## Work Done\n\n- \n\n## Meetings\n\n| Time | Meeting Name |\n| ---- | ------------ |\n| | |\n\n## Follow Ups\n\n### Short Term\n\n- Grab that report for the boss\n- Email back Jon\n\n### Long Term\n\n- Remind Jon that he knows nothing\n\n## Scratch\n\n- \n'
 
-        previous_file = config.file.entries_directory / '2025-02-24_2025-03-02' / '2025-02-28.md'
+        previous_file = config.file.entries_folder / '2025-02-24_2025-03-02' / '2025-02-28.md'
         assert previous_file.exists()
         assert previous_file.read_text() == '# 2025-02-28\n\n## Work Done\n\n- Doing some testing for customer fix (ABC-1234)\n- Helping Arya fix up her test suite\n- Doing self-reviews for the year\n\n## Meetings\n\n| Time | Summary |\n| ---- | ------- |\n| 0900 -> 1000 | Standup |\n| 1300 -> 1500 | Sync w/ Boss |\n\n## Scratch\n\nRandom testing steps\n```\nssh ubuntu@1.2.3.4\nsudo reboot\n```\n'
 
@@ -59,24 +59,24 @@ def test_new_entry():
 def test_collate():
     data_dir = DATA_PATH / '2025-02-24_2025-03-02'
     with temp_config() as (config_file, config):
-        copy_tree(data_dir, config.file.entries_directory / '2025-02-24_2025-03-02')
+        copy_tree(data_dir, config.file.entries_folder / '2025-02-24_2025-03-02')
         runner = CliRunner()
-        result = runner.invoke(main, ['-c', config_file, 'collate', str(config.file.entries_directory / '2025-02-24_2025-03-02')])
+        result = runner.invoke(main, ['-c', config_file, 'collate', str(config.file.entries_folder / '2025-02-24_2025-03-02')])
 
-        assert result.output == f'Collation data written to file {config.file.entries_directory}/2025-02-24_2025-03-02/summary.md\nWriting document to file {config.file.document_directory}/2025-02-27 How to Answer Question.md\nWriting document to file {config.file.document_directory}/2025-02-27 Another Specific Question.md\nCleaning up files in dir {config.file.entries_directory}/2025-02-24_2025-03-02\n'
-        expected_summary = config.file.entries_directory / '2025-02-24_2025-03-02' / 'summary.md'
+        assert result.output == f'Collation data written to file {config.file.entries_folder}/2025-02-24_2025-03-02/summary.md\nWriting document to file {config.file.document_folder}/2025-02-27 How to Answer Question.md\nWriting document to file {config.file.document_folder}/2025-02-27 Another Specific Question.md\nCleaning up files in dir {config.file.entries_folder}/2025-02-24_2025-03-02\n'
+        expected_summary = config.file.entries_folder / '2025-02-24_2025-03-02' / 'summary.md'
         assert expected_summary.exists()
         assert expected_summary.read_text() == '# Summary | 2025-02-24 -> 2025-03-02\n\n## Work Done\n\n- Writing up customer support (ABC-1234)\n- Doing some testing for customer fix (ABC-1234)\n\n- Helping Arya fix up her test suite\n- Doing self-reviews for the year\n'
 
-        expected_doc1 = config.file.document_directory / '2025-02-27 How to Answer Question.md'
+        expected_doc1 = config.file.document_folder / '2025-02-27 How to Answer Question.md'
         assert expected_doc1.exists()
         assert expected_doc1.read_text() == '# 2025-02-27 How to Answer Question\n\nHow to answer a specific question Sansa asked\nWriting this down for later\n```\nssh ubuntu@foo\nsudo /usr/lib/bin/execute.sh\n```\n'
 
-        expected_doc2 = config.file.document_directory / '2025-02-27 Another Specific Question.md'
+        expected_doc2 = config.file.document_folder / '2025-02-27 Another Specific Question.md'
         assert expected_doc2.exists()
         assert expected_doc2.read_text() == '# 2025-02-27 Another Specific Question\n\nHow to answer another specific question\nThis can be rolled up into a runbook later\n\n## Another point\n\nThis is another point that should go in the same runbook doc\n'
 
-        scratch_file = config.file.entries_directory / '2025-02-24_2025-03-02' / '2025-02-27.md'
+        scratch_file = config.file.entries_folder / '2025-02-24_2025-03-02' / '2025-02-27.md'
         assert scratch_file.exists()
         assert scratch_file.read_text() == '# 2025-02-27\n\n## Work Done\n\n- Writing up customer support (ABC-1234)\n\n## Meetings\n\n| Time | Summary |\n| ---- | ------- |\n| 0900 -> 1000 | Standup |\n| 1300 -> 1500 | Sync w/ Boss |\n'
 
@@ -87,7 +87,7 @@ def test_merge():
         runner = CliRunner()
 
         # Create sample documentation files (like those extracted from collate)
-        doc1_path = config.file.document_directory / '2025-02-10 How to Deploy API.md'
+        doc1_path = config.file.document_folder / '2025-02-10 How to Deploy API.md'
         doc1_content = '''# 2025-02-10 How to Deploy API
 
 ## Prerequisites
@@ -103,7 +103,7 @@ def test_merge():
 '''
         doc1_path.write_text(doc1_content)
 
-        doc2_path = config.file.document_directory / '2025-02-15 How to Deploy API.md'
+        doc2_path = config.file.document_folder / '2025-02-15 How to Deploy API.md'
         doc2_content = '''# 2025-02-15 How to Deploy API
 
 ## Prerequisites
@@ -123,7 +123,7 @@ If deployment fails:
 '''
         doc2_path.write_text(doc2_content)
 
-        doc3_path = config.file.document_directory / '2025-02-20 Database Migration Guide.md'
+        doc3_path = config.file.document_folder / '2025-02-20 Database Migration Guide.md'
         doc3_content = '''# 2025-02-20 Database Migration Guide
 
 ## Prerequisites
@@ -140,9 +140,9 @@ If deployment fails:
         doc3_path.write_text(doc3_content)
 
         # Now merge the documentation files into a single runbook
-        output_file = config.file.document_directory / 'complete-operations-runbook.md'
+        output_file = config.file.document_folder / 'complete-operations-runbook.md'
         result = runner.invoke(main, ['-c', config_file, 'merge',
-                                     str(config.file.document_directory),
+                                     str(config.file.document_folder),
                                      str(output_file),
                                      '-t', 'Complete Operations Runbook'])
 
@@ -188,7 +188,7 @@ def test_new_entry_auto_generate_false():
         runner = CliRunner()
         result = runner.invoke(main, ['-c', config_file, 'new-entry'])
         assert result.exit_code == 0
-        entry_file = Path(config.file.entries_directory) / '2025-02-24_2025-03-02' / '2025-03-01.md'
+        entry_file = Path(config.file.entries_folder) / '2025-02-24_2025-03-02' / '2025-03-01.md'
         content = entry_file.read_text()
         assert '## Work Done' in content
         assert '## Notes' not in content
@@ -203,7 +203,7 @@ def test_new_entry_auto_generate_true_by_default():
         runner = CliRunner()
         result = runner.invoke(main, ['-c', config_file, 'new-entry'])
         assert result.exit_code == 0
-        entry_file = Path(config.file.entries_directory) / '2025-02-24_2025-03-02' / '2025-03-01.md'
+        entry_file = Path(config.file.entries_folder) / '2025-02-24_2025-03-02' / '2025-03-01.md'
         content = entry_file.read_text()
         assert '## Work Done' in content
         assert '## Notes' in content

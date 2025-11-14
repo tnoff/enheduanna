@@ -11,6 +11,7 @@ from enheduanna.types.markdown.markdown_section import MarkdownSection
 from enheduanna.utils.collation import create_parent_folder
 from enheduanna.utils.files import list_markdown_files, find_last_markdown_file, normalize_file_name
 from enheduanna.utils.markdown import generate_markdown_collation, generate_markdown_merge, remove_empty_sections
+from enheduanna.utils.media import organize_media_for_collation, update_markdown_media_references, parse_collation_folder_name
 
 
 def ensure_entry_file(parent_folder: Path, today: date, config: Config,
@@ -60,7 +61,7 @@ def new_entry(context: click.Context):
     # Get date basics
     today = date.today()
     # Find last file, see if it has any carryover sections
-    last_file = find_last_markdown_file(context.obj.file.entries_directory)
+    last_file = find_last_markdown_file(context.obj.file.entries_folder)
     if last_file:
         last_file = MarkdownFile.from_file(last_file)
     # Get folder and file ready
@@ -93,10 +94,17 @@ def collate(context: click.Context, file_dir: str, title, collate_name: str):
     new_path.write_text(new_document.write())
     click.echo(f'Collation data written to file {new_path}')
     for document in documents:
-        new_path = context.obj.file.document_directory / f'{normalize_file_name(document.title)}.md'
+        new_path = context.obj.file.document_folder / f'{normalize_file_name(document.title)}.md'
         new_file = MarkdownFile(new_path, document)
         new_file.write()
         click.echo(f'Writing document to file {new_path}')
+    # Organize media files if configured
+    date_range = parse_collation_folder_name(file_dir.name, context.obj.file.date_output_format)
+    if date_range:
+        start_date, end_date = date_range
+        filename_mapping = organize_media_for_collation(file_dir, start_date, end_date, context.obj.file.media)
+        if filename_mapping:
+            update_markdown_media_references(markdown_files, filename_mapping)
     # Clean up files at the end
     click.echo(f'Cleaning up files in dir {file_dir}')
     remove_empty_sections(markdown_files)
