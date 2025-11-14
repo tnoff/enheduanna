@@ -364,6 +364,62 @@ file:
       groupBy: ticket
 ```
 
+### Media Organization
+
+Optionally organize screenshots and photos into your collation folders during the `collate` command. When enabled, media files from a source directory (like `~/Screenshots`) will be moved or copied to a `media/` subfolder within each collation folder, and markdown image references will be automatically updated.
+
+**Note:** This feature is disabled by default. Set `enabled: true` in the config to activate it.
+
+| Param | Type | Description |
+| ----- | ---- | ----------- |
+| source_directory | Path | Directory to scan for media files (e.g., `~/Screenshots`) |
+| date_regex | str | Regex pattern to extract datetime from filenames. Must include named groups: `year`, `month`, `day`, `hour`, `minute`, `second` |
+| subfolder | str | Name of the subfolder within the collation folder to store media files (default: `"media"`) |
+| operation | str | Either `"move"` or `"copy"` - whether to move or copy files from source to collation folder |
+| extensions | list[str] | List of file extensions to process (default: `[".png", ".jpg", ".jpeg", ".gif", ".webp"]`) |
+| enabled | boolean | Enable or disable media organization (default: `false`) |
+
+When files are organized:
+- Files are renamed to: `YYYY-MM-DD_HH-MM-SS.ext` (e.g., `2025-01-20_14-30-45.png`)
+- Only files matching the collation date range are processed
+- Markdown image references are automatically updated to point to `./media/filename`
+- Files that don't match the regex are silently ignored
+
+Example config:
+
+```
+---
+file:
+  media:
+    source_directory: /home/user/Screenshots
+    date_regex: "Screenshot_(?P<year>\\d{4})-(?P<month>\\d{2})-(?P<day>\\d{2})_(?P<hour>\\d{2})-(?P<minute>\\d{2})-(?P<second>\\d{2})"
+    subfolder: media  # or "images", "screenshots", etc.
+    operation: move
+    extensions:
+      - .png
+      - .jpg
+      - .jpeg
+    enabled: true
+```
+
+**Workflow Example:**
+
+1. You take screenshots during the week, stored in `~/Screenshots`:
+   - `Screenshot_2025-01-20_14-30-45.png`
+   - `Screenshot_2025-01-21_09-15-30.png`
+
+2. You reference them in your entries:
+   ```markdown
+   # 2025-01-20
+   ## Work Done
+   - Fixed the login bug ![screenshot](~/Screenshots/Screenshot_2025-01-20_14-30-45.png)
+   ```
+
+3. When you run `enheduanna collate ~/Notes/2025-01-20_2025-01-26`:
+   - Screenshots are moved to `~/Notes/2025-01-20_2025-01-26/media/`
+   - Renamed to `2025-01-20_14-30-45.png`, `2025-01-21_09-15-30.png`
+   - Markdown references updated to `![screenshot](./media/2025-01-20_14-30-45.png)`
+
 ### Collation Settings
 
 You can configure whether you want the sub-directories created to be on a per week or per month basis. The accepted values here are `weekly` and `monthly`.
