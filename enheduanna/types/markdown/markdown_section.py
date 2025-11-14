@@ -6,7 +6,7 @@ from pydantic import Field
 from pydantic import TypeAdapter
 from pydantic.dataclasses import dataclass
 
-from enheduanna.types.markdown.rollup_section import RollupSection
+from enheduanna.types.markdown.collate_section import CollateSection
 
 ALPHANUMERIC_REGEX = r'[a-zA-Z0-9]'
 
@@ -24,7 +24,7 @@ class MarkdownSection:
     contents: str
     level: int = Field(default=1)
     sections: list[Self] = Field(default_factory=list)
-    carryover: bool = False
+    rollover: bool = False
 
     def is_empty(self) -> bool:
         '''
@@ -105,24 +105,24 @@ class MarkdownSection:
             self.add_section(section)
         return True
 
-    def group_contents(self, rollup_section: RollupSection, force_grouping: bool = False) -> bool:
+    def group_contents(self, collate_section: CollateSection, force_grouping: bool = False) -> bool:
         '''
-        Group contents by a rollup section regex
+        Group contents by a collate section regex
 
-        rollup_section : RollupSection to group by
+        collate_section : CollateSection to group by
         force_grouping : Force grouping on subsections
         '''
-        if not force_grouping and not rollup_section.regex and self.title != rollup_section.title:
+        if not force_grouping and not collate_section.regex and self.title != collate_section.title:
             return False
         matching = {}
         non_matching = []
         for item in self.contents.split('\n'):
             if not item:
                 continue
-            if rollup_section.regex:
-                matcher = search(rollup_section.regex, item)
+            if collate_section.regex:
+                matcher = search(collate_section.regex, item)
                 if matcher:
-                    key = matcher.group(rollup_section.groupBy)
+                    key = matcher.group(collate_section.groupBy)
                     matching.setdefault(key, [])
                     matching[key].append(item)
                     continue
@@ -137,7 +137,7 @@ class MarkdownSection:
         new_contents = new_contents.rstrip()
         self.contents = new_contents
         for section in self.sections:
-            section.group_contents(rollup_section, force_grouping=True)
+            section.group_contents(collate_section, force_grouping=True)
         return True
 
     def write(self) -> str:
