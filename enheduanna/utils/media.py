@@ -119,7 +119,7 @@ def update_markdown_media_references(markdown_files: List[MarkdownFile],
             # Matches: ![...](~/path/to/old_filename) or ![...](/path/to/old_filename) or ![...](.../old_filename)
             markdown_pattern = rf'(!\[([^\]]*)\]\()([^)]*{re.escape(old_filename)})(\))'
 
-            def replace_markdown_ref(match):
+            def replace_markdown_ref(match, subfolder=subfolder, new_filename=new_filename):
                 alt_start = match.group(1)  # ![alt](
                 end_paren = match.group(4)  # )
 
@@ -132,7 +132,7 @@ def update_markdown_media_references(markdown_files: List[MarkdownFile],
             # Also handle HTML img tags: <img src="path">
             html_pattern = rf'(<img\s+[^>]*src=")([^"]*{re.escape(old_filename)})(")'
 
-            def replace_html_ref(match):
+            def replace_html_ref(match, subfolder=subfolder, new_filename=new_filename):
                 start = match.group(1)  # <img ... src="
                 end_quote = match.group(3)  # "
 
