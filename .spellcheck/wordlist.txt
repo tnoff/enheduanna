@@ -28,6 +28,11 @@ groupBy
 prometheus
 runbook
 subfolder
+subfolders
 jpeg
 jpg
 png
+MediaSource
+yaml
+gif
+webp
