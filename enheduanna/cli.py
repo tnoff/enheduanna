@@ -59,7 +59,7 @@ def new_entry(context: click.Context):
     # Get date basics
     today = date.today()
     # Find last file, see if it has any carryover sections
-    last_file = find_last_markdown_file(context.obj.file.entries_directory)
+    last_file = find_last_markdown_file(context.obj.file.entries_folder)
     if last_file:
         last_file = MarkdownFile.from_file(last_file)
     # Get folder and file ready
@@ -92,7 +92,7 @@ def collate(context: click.Context, file_dir: str, title, collate_name: str):
     new_path.write_text(new_document.write())
     click.echo(f'Collation data written to file {new_path}')
     for document in documents:
-        new_path = context.obj.file.document_directory / f'{normalize_file_name(document.title)}.md'
+        new_path = context.obj.file.document_folder / f'{normalize_file_name(document.title)}.md'
         new_file = MarkdownFile(new_path, document)
         new_file.write()
         click.echo(f'Writing document to file {new_path}')
@@ -102,7 +102,7 @@ def collate(context: click.Context, file_dir: str, title, collate_name: str):
         start_date, end_date = date_range
         filename_mapping = organize_media_for_collation(file_dir, start_date, end_date, context.obj.file.media)
         if filename_mapping:
-            update_markdown_media_references(markdown_files, context.obj.file.media.subfolder, filename_mapping)
+            update_markdown_media_references(markdown_files, filename_mapping)
     # Clean up files at the end
     click.echo(f'Cleaning up files in dir {file_dir}')
     remove_empty_sections(markdown_files)

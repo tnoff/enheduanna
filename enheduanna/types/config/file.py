@@ -26,8 +26,8 @@ class FileConfig:
     '''
     Config file options
     '''
-    entries_directory: Path = ENTRIES_DIR_DEFAULT
-    document_directory: Path = DOCUMENT_DIR_DEFAULT
+    entries_folder: Path = ENTRIES_DIR_DEFAULT
+    document_folder: Path = DOCUMENT_DIR_DEFAULT
     date_output_format: str = DATE_OUTPUT_FORMAT_DEFAULT
 
     entry_sections: List[MarkdownSection] = Field(default_factory=list)
