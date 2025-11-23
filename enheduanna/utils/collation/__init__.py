@@ -13,15 +13,15 @@ def create_parent_folder(config: Config, today: date) -> Path:
     config: Complete config
     '''
 
-    config.file.entries_directory.mkdir(exist_ok=True)
+    config.file.entries_folder.mkdir(exist_ok=True)
     match config.collation.type:
         case CollationType.MONTHLY:
             start = get_start_of_month(today)
             end = get_end_of_month(today)
-            parent_folder = config.file.entries_directory / f'{start.strftime(config.file.date_output_format)}_{end.strftime(config.file.date_output_format)}'
+            parent_folder = config.file.entries_folder / f'{start.strftime(config.file.date_output_format)}_{end.strftime(config.file.date_output_format)}'
         case _:
             start = get_start_of_week(today)
             end = get_end_of_week(today)
-            parent_folder = config.file.entries_directory / f'{start.strftime(config.file.date_output_format)}_{end.strftime(config.file.date_output_format)}'
+            parent_folder = config.file.entries_folder / f'{start.strftime(config.file.date_output_format)}_{end.strftime(config.file.date_output_format)}'
     parent_folder.mkdir(exist_ok=True)
     return parent_folder
