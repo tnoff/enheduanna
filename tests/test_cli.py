@@ -13,6 +13,7 @@ from enheduanna.cli import main
 
 from enheduanna.types.config import Config
 from enheduanna.types.config.file import FileConfig
+from enheduanna.types.markdown.markdown_section import MarkdownSection
 
 DATA_PATH = Path(__file__).parent / 'data'
 
@@ -23,6 +24,17 @@ def temp_config():
         with TemporaryDirectory() as note_dir:
             with TemporaryDirectory() as doc_dir:
                 file_config = FileConfig(entries_directory=note_dir, document_directory=doc_dir)
+                config = Config(file_config, {})
+                config_path.write_text(dump(RootModel[Config](config).model_dump_json()))
+                yield config_path, config
+
+@contextmanager
+def temp_config_with_sections(sections):
+    with NamedTemporaryFile() as tmp_config:
+        config_path = Path(tmp_config.name)
+        with TemporaryDirectory() as note_dir:
+            with TemporaryDirectory() as doc_dir:
+                file_config = FileConfig(entries_directory=note_dir, document_directory=doc_dir, entry_sections=sections)
                 config = Config(file_config, {})
                 config_path.write_text(dump(RootModel[Config](config).model_dump_json()))
                 yield config_path, config
@@ -165,3 +177,33 @@ If deployment fails:
         # Verify Migration Steps section exists
         assert '### Migration Steps' in content
         assert 'python manage.py migrate' in content
+
+@freeze_time('2025-03-01 12:00:00', tz_offset=0)
+def test_new_entry_auto_generate_false():
+    sections = [
+        MarkdownSection('Work Done', '- ', level=2),
+        MarkdownSection('Notes', '- ', level=2, auto_generate=False),
+    ]
+    with temp_config_with_sections(sections) as (config_file, config):
+        runner = CliRunner()
+        result = runner.invoke(main, ['-c', config_file, 'new-entry'])
+        assert result.exit_code == 0
+        entry_file = Path(config.file.entries_directory) / '2025-02-24_2025-03-02' / '2025-03-01.md'
+        content = entry_file.read_text()
+        assert '## Work Done' in content
+        assert '## Notes' not in content
+
+@freeze_time('2025-03-01 12:00:00', tz_offset=0)
+def test_new_entry_auto_generate_true_by_default():
+    sections = [
+        MarkdownSection('Work Done', '- ', level=2),
+        MarkdownSection('Notes', '- ', level=2),
+    ]
+    with temp_config_with_sections(sections) as (config_file, config):
+        runner = CliRunner()
+        result = runner.invoke(main, ['-c', config_file, 'new-entry'])
+        assert result.exit_code == 0
+        entry_file = Path(config.file.entries_directory) / '2025-02-24_2025-03-02' / '2025-03-01.md'
+        content = entry_file.read_text()
+        assert '## Work Done' in content
+        assert '## Notes' in content

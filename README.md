@@ -315,12 +315,13 @@ file:
 
 The default sections for the entry markdown files. Each "MarkdownSection" should have the following params:
 
-| Param | Type | Description | 
+| Param | Type | Description |
 | ----- | ---- | ----------- |
 | title | str | Title of section |
 | contents | str | Placeholder contents of section |
 | level | int | Level of section, meaning how many `#`'s are placed before the title
-| rollover | boolean | If the contents of the previous entry should be rolled over | 
+| rollover | boolean | If the contents of the previous entry should be rolled over |
+| auto_generate | boolean | If the section should be included when generating a new entry (default: true) |
 
 
 The config can take a list of these, they will be added to the file in order. Note that these will override all of the existing defaults.
@@ -344,7 +345,13 @@ file:
     - title: Scratch
       contents: "- "
       level: 2
+    - title: Notes
+      contents: "- "
+      level: 2
+      auto_generate: false
 ```
+
+Sections with `auto_generate: false` will not be included when creating a new entry via `new-entry`, but are still recognized by the system for collation, merge, and rollover. This is useful for sections you only want to add manually to specific entries.
 
 ### Collate Sections
 

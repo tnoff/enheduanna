@@ -25,6 +25,7 @@ class MarkdownSection:
     level: int = Field(default=1)
     sections: list[Self] = Field(default_factory=list)
     rollover: bool = False
+    auto_generate: bool = True
 
     def is_empty(self) -> bool:
         '''
