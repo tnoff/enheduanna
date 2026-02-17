@@ -27,6 +27,8 @@ def ensure_entry_file(parent_folder: Path, today: date, config: Config,
         return entry_file
     markdown_contents = MarkdownSection(today.strftime(config.file.date_output_format), '')
     for section in config.file.entry_sections:
+        if not section.auto_generate:
+            continue
         # Roll over existing section from last file if applicable
         if last_markdown_file and section.rollover:
             existing_section = last_markdown_file.root_section.remove_section(section.title)

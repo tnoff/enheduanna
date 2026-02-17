@@ -50,3 +50,24 @@ collation:
         path.write_text(test_data)
         c = Config.from_yaml(path)
         assert c.collation.type == CollationType.MONTHLY
+
+def test_load_yaml_auto_generate():
+    test_data = '''---
+file:
+  entry_sections:
+    - title: Work Done
+      contents: "- "
+      level: 2
+    - title: Notes
+      contents: "- "
+      level: 2
+      auto_generate: false
+'''
+    with NamedTemporaryFile() as tmp:
+        path = Path(tmp.name)
+        path.write_text(test_data)
+        c = Config.from_yaml(path)
+        assert c.file.entry_sections[0].title == 'Work Done'
+        assert c.file.entry_sections[0].auto_generate is True
+        assert c.file.entry_sections[1].title == 'Notes'
+        assert c.file.entry_sections[1].auto_generate is False
