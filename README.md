@@ -1,6 +1,6 @@
 # Enheduanna
 
-Command line tool for creating entries in Markdown. Organizes entries into sub-directories, and has functions to "collate" multiple entries into summaries and create additional "documentation" files from these notes.
+Command line tool for creating entries in Markdown. Organizes entries into sub-folders, and has functions to "collate" multiple entries into summaries and create additional "documentation" files from these notes.
 
 Useful for keeping track of work done throughout the week, tracking follow up items, and starting proper documentation from your notes. In particular helps with keeping track of your work throughout the year/quarter for when you do self-reviews or need to update your resume.
 
@@ -29,7 +29,7 @@ $ docker build -t enheduanna .
 
 ### Run commands with Docker
 
-The Docker container comes with a default configuration that uses `/notes` and `/documents` as the base directories. Mount your local directories to these paths:
+The Docker container comes with a default configuration that uses `/notes` and `/documents` as the base folders. Mount your local folders to these paths:
 
 ```bash
 # Run new-entry command (creates today's note)
@@ -74,7 +74,7 @@ Run `enheduanna --help` to see all options.
 
 ## Entry Files
 
-The `new-entry` command will create a markdown entry file for today. The entry file will be named for the current day, such as `2025-01-21.md`. By default, the file will be placed in a sub-directory for the current week, but this can be configured to be a sub-directory for the entire month. 
+The `new-entry` command will create a markdown entry file for today. The entry file will be named for the current day, such as `2025-01-21.md`. By default, the file will be placed in a sub-folder for the current week, but this can be configured to be a sub-folder for the entire month. 
 
 The format will look like this:
 
@@ -168,7 +168,7 @@ The contents of the `2025-01-23.md` file will also be updated to remove the `Fol
 
 ## Collation
 
-Use the `collate` command against a note directory to collate all of the entry files in that directory into a `summary.md` file in that same directory.
+Use the `collate` command against a note folder to collate all of the entry files in that folder into a `summary.md` file in that same folder.
 
 By default the `Work Done` section will be combined together and placed into the new `summary.md` file.
 
@@ -206,7 +206,7 @@ summary.md
 
 ### Document Collation
 
-Additionally set a "Document" directory to pull out write ups you've placed in your entries. The idea here is that one-off sections that are not part of the normal section process can be removed and moved to the Document section, as a way of prototyping documentation bits such as runbooks. By default the new documents will be placed in the `~/Documents` directory.
+Additionally set a "Document" folder to pull out write ups you've placed in your entries. The idea here is that one-off sections that are not part of the normal section process can be removed and moved to the Document section, as a way of prototyping documentation bits such as runbooks. By default the new documents will be placed in the `~/Documents` folder.
 
 For example if you have the following entry:
 
@@ -224,7 +224,7 @@ ssh ubuntu@foo.com
 sudo reboot
 ```
 
-The `collate` command will create a new file named `2025-01-20 Steps to Reboot Servers.md` in the document directory with the following contents:
+The `collate` command will create a new file named `2025-01-20 Steps to Reboot Servers.md` in the document folder with the following contents:
 
 ```
 ## 2025-01-20 Steps to Reboot Servers
@@ -238,7 +238,7 @@ The contents of the section that was moved will also be removed from the origina
 
 ## Merge
 
-Use the `merge` command to combine all markdown files from a directory into a single markdown file. Unlike `collate`, the merge command:
+Use the `merge` command to combine all markdown files from a folder into a single markdown file. Unlike `collate`, the merge command:
 
 - Combines **all** sections from all files (doesn't use collate section configuration)
 - Preserves each file as a separate section with subsections increased by 1 level
@@ -252,7 +252,7 @@ Each input file becomes a level 2 section (##) in the merged document, with all 
 **Usage:**
 
 ```bash
-enheduanna merge <directory> <output_file>
+enheduanna merge <folder> <output_file>
 
 # Example: Combine documentation files
 enheduanna merge ~/Documents ~/Documents/complete-runbook.md
@@ -275,7 +275,7 @@ The various config options.
 
 ### Date Format
 
-Set the date format in the config file. The date format will determine the paths of the directories and the note files, as well as the default title of each note file.
+Set the date format in the config file. The date format will determine the paths of the folders and the note files, as well as the default title of each note file.
 
 Should be in the standard [python datetime format](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes).
 
@@ -287,28 +287,28 @@ file:
   date_format: %Y-%m-%d
 ```
 
-### Entries Directory
+### Entries Folder
 
-Override the entries directory where all parent directories are placed.
-
-Example Config
-
-```
----
-file:
-  entries_directory: /home/user/Notes
-```
-
-### Document Directory
-
-Override the document directory where collation docs are placed in.
+Override the entries folder where all parent folders are placed.
 
 Example Config
 
 ```
 ---
 file:
-  document_directory: /home/user/Documents
+  entries_folder: /home/user/Notes
+```
+
+### Document Folder
+
+Override the document folder where collation docs are placed in.
+
+Example Config
+
+```
+---
+file:
+  document_folder: /home/user/Documents
 ```
 
 ### Entry Sections
@@ -371,9 +371,81 @@ file:
       groupBy: ticket
 ```
 
+### Media Organization
+
+Optionally organize screenshots, downloads, and photos into your collation folders during the `collate` command. When enabled, media files from one or more source folders (like `~/Screenshots`, `~/Downloads`) will be moved or copied to subfolders within each collation folder, and markdown image references will be automatically updated.
+
+**Note:** This feature is disabled by default. Set `enabled: true` in the config to activate it.
+
+**Configuration Parameters:**
+
+| Param | Type | Description |
+| ----- | ---- | ----------- |
+| sources | list[MediaSource] | List of source folders to scan for media files |
+| extensions | list[str] | List of file extensions to process (default: `[".png", ".jpg", ".jpeg", ".gif", ".webp"]`) |
+| enabled | boolean | Enable or disable media organization (default: `false`) |
+
+**MediaSource Parameters:**
+
+| Param | Type | Description |
+| ----- | ---- | ----------- |
+| folder | Path | Source folder to scan for media files (e.g., `~/Screenshots`, `~/Downloads`) |
+| operation | str | Either `"move"` or `"copy"` - whether to move or copy files from source to collation folder |
+| subfolder | str | Subfolder path within the collation folder to store media files (e.g., `"media/screenshots"`) |
+
+**How it works:**
+- Files are identified by their **modified time** (no regex parsing needed)
+- Files are renamed to: `YYYY-MM-DD_HH-MM-SS.ext` (e.g., `2025-01-20_14-30-45.png`)
+- Only files with modified times within the collation date range are processed
+- Each source folder can have different operations (move vs copy) and destination subfolders
+- Markdown image references are automatically updated to point to the new locations
+
+**Example config:**
+
+```yaml
+---
+file:
+  media:
+    sources:
+      - folder: ~/Screenshots
+        operation: move
+        subfolder: media/screenshots
+      - folder: ~/Downloads
+        operation: copy
+        subfolder: media/downloads
+    extensions:
+      - .png
+      - .jpg
+      - .jpeg
+      - .gif
+      - .webp
+    enabled: true
+```
+
+**Workflow Example:**
+
+1. You take screenshots and download images during the week:
+   - `~/Screenshots/screenshot1.png` (modified: 2025-01-20 14:30:45)
+   - `~/Downloads/diagram.jpg` (modified: 2025-01-21 09:15:30)
+
+2. You reference them in your entries:
+   ```markdown
+   # 2025-01-20
+   ## Work Done
+   - Fixed the login bug ![screenshot](~/Screenshots/screenshot1.png)
+   - Updated architecture ![diagram](~/Downloads/diagram.jpg)
+   ```
+
+3. When you run `enheduanna collate ~/Notes/2025-01-20_2025-01-26`:
+   - `screenshot1.png` is moved to `~/Notes/2025-01-20_2025-01-26/media/screenshots/2025-01-20_14-30-45.png`
+   - `diagram.jpg` is copied to `~/Notes/2025-01-20_2025-01-26/media/downloads/2025-01-21_09-15-30.jpg`
+   - Markdown references are updated:
+     - `![screenshot](./media/screenshots/2025-01-20_14-30-45.png)`
+     - `![diagram](./media/downloads/2025-01-21_09-15-30.jpg)`
+
 ### Collation Settings
 
-You can configure whether you want the sub-directories created to be on a per week or per month basis. The accepted values here are `weekly` and `monthly`.
+You can configure whether you want the sub-folders created to be on a per week or per month basis. The accepted values here are `weekly` and `monthly`.
 
 ```
 collation:

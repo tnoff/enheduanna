@@ -8,6 +8,7 @@ from pydantic.dataclasses import dataclass
 from enheduanna.defaults import ENTRIES_DIR_DEFAULT, DOCUMENT_DIR_DEFAULT, DATE_OUTPUT_FORMAT_DEFAULT
 from enheduanna.types.markdown.markdown_section import MarkdownSection
 from enheduanna.types.markdown.collate_section import CollateSection
+from enheduanna.types.config.media import MediaConfig
 
 ENTRY_SECTIONS_DEFAULT = [
     MarkdownSection('Work Done', '- ', level=2),
@@ -25,12 +26,13 @@ class FileConfig:
     '''
     Config file options
     '''
-    entries_directory: Path = ENTRIES_DIR_DEFAULT
-    document_directory: Path = DOCUMENT_DIR_DEFAULT
+    entries_folder: Path = ENTRIES_DIR_DEFAULT
+    document_folder: Path = DOCUMENT_DIR_DEFAULT
     date_output_format: str = DATE_OUTPUT_FORMAT_DEFAULT
 
     entry_sections: List[MarkdownSection] = Field(default_factory=list)
     collate_sections: List[CollateSection] = Field(default_factory=list)
+    media: MediaConfig = Field(default_factory=MediaConfig)
 
     @model_validator(mode='after')
     def validate_entry_sections(self) -> Self:

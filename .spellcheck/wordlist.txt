@@ -27,3 +27,12 @@ groupBy
 24th
 prometheus
 runbook
+subfolder
+subfolders
+jpeg
+jpg
+png
+MediaSource
+yaml
+gif
+webp
