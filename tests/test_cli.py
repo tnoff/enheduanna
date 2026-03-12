@@ -194,6 +194,23 @@ def test_new_entry_auto_generate_false():
         assert '## Notes' not in content
 
 @freeze_time('2025-03-01 12:00:00', tz_offset=0)
+def test_new_entry_rollover_with_auto_generate_false():
+    data_dir = DATA_PATH / '2025-02-24_2025-03-02'
+    sections = [
+        MarkdownSection('Work Done', '- ', level=2),
+        MarkdownSection('Follow Ups', '- ', level=2, rollover=True, auto_generate=False),
+    ]
+    with temp_config_with_sections(sections) as (config_file, config):
+        copy_tree(data_dir, config.file.entries_folder / '2025-02-24_2025-03-02')
+        runner = CliRunner()
+        result = runner.invoke(main, ['-c', config_file, 'new-entry'])
+        assert result.exit_code == 0
+        entry_file = Path(config.file.entries_folder) / '2025-02-24_2025-03-02' / '2025-03-01.md'
+        content = entry_file.read_text()
+        assert '## Work Done' in content
+        assert '## Follow Ups' in content
+
+@freeze_time('2025-03-01 12:00:00', tz_offset=0)
 def test_new_entry_auto_generate_true_by_default():
     sections = [
         MarkdownSection('Work Done', '- ', level=2),
