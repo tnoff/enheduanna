@@ -1,0 +1,15 @@
+name: Dependabot Auto Approve
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  # test requirements: any update type, filtered by path
+  auto-approve-test-reqs:
+    uses: tnoff/github-workflows/.github/workflows/dependabot-auto-approve.yml@39e12f56e2a091e61ba84b1d8615d176f11f49a2
+    with:
+      file_pattern: 'tests/**'
+      allowed_update_types: 'major,minor,patch'
+    secrets:
+      bot_token: ${{ secrets.APPROVAL_BOT_PAT }}
