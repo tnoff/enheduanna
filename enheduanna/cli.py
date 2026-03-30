@@ -128,5 +128,5 @@ def merge(file_dir: str, output_file: str, title):
     output_file.write_text(merged_section.write())
     click.echo(f'Merged data written to file {output_file}')
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     main(obj={}) # pylint:disable=no-value-for-parameter

@@ -1,18 +1,22 @@
 from contextlib import contextmanager
+from datetime import datetime
 from distutils.dir_util import copy_tree
 from json import dumps
+from pathlib import Path
 from tempfile import TemporaryDirectory, NamedTemporaryFile
+import os
 
 from click.testing import CliRunner
 from freezegun import freeze_time
-from pathlib import Path
 from pydantic import RootModel
 from yaml import dump
 
 from enheduanna.cli import main
 
 from enheduanna.types.config import Config
+from enheduanna.types.config.collation import CollationConfig
 from enheduanna.types.config.file import FileConfig
+from enheduanna.types.config.media import MediaConfig, MediaSource
 from enheduanna.types.markdown.markdown_section import MarkdownSection
 
 DATA_PATH = Path(__file__).parent / 'data'
@@ -224,3 +228,48 @@ def test_new_entry_auto_generate_true_by_default():
         content = entry_file.read_text()
         assert '## Work Done' in content
         assert '## Notes' in content
+
+@freeze_time('2025-03-01 12:00:00', tz_offset=0)
+def test_new_entry_file_already_exists():
+    with temp_config() as (config_file, config):
+        runner = CliRunner()
+        runner.invoke(main, ['-c', config_file, 'new-entry'])
+        result = runner.invoke(main, ['-c', config_file, 'new-entry'])
+        assert result.exit_code == 0
+        entry_file = Path(config.file.entries_folder) / '2025-02-24_2025-03-02' / '2025-03-01.md'
+        assert entry_file.exists()
+
+@freeze_time('2025-03-01 12:00:00', tz_offset=0)
+def test_collate_with_media():
+    data_dir = DATA_PATH / '2025-02-24_2025-03-02'
+    with TemporaryDirectory() as tmpdir:
+        tmpdir = Path(tmpdir)
+        media_source_dir = tmpdir / 'media_source'
+        media_source_dir.mkdir()
+        media_file = media_source_dir / 'screenshot.png'
+        media_file.write_bytes(b'fake image data')
+        mtime = datetime(2025, 2, 26, 12, 0, 0).timestamp()
+        os.utime(media_file, (mtime, mtime))
+
+        note_dir = tmpdir / 'notes'
+        note_dir.mkdir()
+        doc_dir = tmpdir / 'docs'
+        doc_dir.mkdir()
+
+        media_config = MediaConfig(
+            sources=[MediaSource(folder=media_source_dir, operation='copy', subfolder='media')],
+            extensions=['.png'],
+            enabled=True
+        )
+        file_config = FileConfig(entries_folder=note_dir, document_folder=doc_dir, media=media_config)
+        config = Config(file_config, CollationConfig())
+
+        with NamedTemporaryFile() as tmp_config:
+            config_path = Path(tmp_config.name)
+            config_path.write_text(dump(RootModel[Config](config).model_dump_json()))
+
+            copy_tree(str(data_dir), str(note_dir / '2025-02-24_2025-03-02'))
+            runner = CliRunner()
+            result = runner.invoke(main, ['-c', str(config_path), 'collate',
+                                         str(note_dir / '2025-02-24_2025-03-02')])
+            assert result.exit_code == 0

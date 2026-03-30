@@ -140,6 +140,22 @@ def test_merge_markdown_sections():
         assert migration_doc.sections[1].level == 3
         assert 'Stop app servers' in migration_doc.sections[1].contents
 
+def test_combine_markdown_sections_recursive():
+    outer = MarkdownSection('2025-02-10', '', level=1)
+    inner = MarkdownSection('Inner', '', level=1)
+    work = MarkdownSection('Work Done', 'some work', level=2)
+    inner.add_section(work)
+    outer.add_section(inner)
+
+    cs = CollateSection('Work Done')
+
+    with TemporaryDirectory() as tmpdir:
+        path = Path(tmpdir) / '2025-02-10.md'
+        mf = MarkdownFile(path, outer)
+        result, _ = generate_markdown_collation([mf], [cs], [])
+        assert len(result) == 1
+        assert result[0].title == 'Work Done'
+
 def test_remove_sections():
     m = MarkdownSection('2025-03-01', '', level=1)
     m1 = MarkdownSection('Scratch', '-', level=2)

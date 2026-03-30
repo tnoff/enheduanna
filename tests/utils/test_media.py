@@ -308,6 +308,70 @@ def test_update_markdown_media_references():
         assert '~/Screenshots/screenshot1.png' not in updated_content
         assert '/home/user/Downloads/download1.jpg' not in updated_content
 
+def test_parse_collation_folder_name_no_underscore():
+    result = parse_collation_folder_name('nodash', '%Y-%m-%d')
+    assert result is None
+
+def test_organize_media_source_not_exists():
+    with TemporaryDirectory() as tmpdir:
+        tmpdir = Path(tmpdir)
+        collation_dir = tmpdir / '2025-01-20_2025-01-26'
+        collation_dir.mkdir()
+        config = MediaConfig(
+            sources=[MediaSource(folder=tmpdir / 'nonexistent', operation='copy', subfolder='media')],
+            extensions=['.png'],
+            enabled=True
+        )
+        start = datetime(2025, 1, 20, 0, 0, 0)
+        end = datetime(2025, 1, 26, 23, 59, 59)
+        mapping = organize_media_for_collation(collation_dir, start, end, config)
+        assert len(mapping) == 0
+
+def test_organize_media_directory_in_source():
+    with TemporaryDirectory() as tmpdir:
+        tmpdir = Path(tmpdir)
+        source_dir = tmpdir / 'screenshots'
+        source_dir.mkdir()
+        subdir = source_dir / 'subdir'
+        subdir.mkdir()
+        file1 = source_dir / 'screenshot1.png'
+        file1.write_text('test image')
+        mtime = datetime(2025, 1, 20, 14, 30, 45).timestamp()
+        os.utime(file1, (mtime, mtime))
+        collation_dir = tmpdir / '2025-01-20_2025-01-26'
+        collation_dir.mkdir()
+        config = MediaConfig(
+            sources=[MediaSource(folder=source_dir, operation='copy', subfolder='media')],
+            extensions=['.png'],
+            enabled=True
+        )
+        start = datetime(2025, 1, 20, 0, 0, 0)
+        end = datetime(2025, 1, 26, 23, 59, 59)
+        mapping = organize_media_for_collation(collation_dir, start, end, config)
+        assert len(mapping) == 1
+        assert 'screenshot1.png' in mapping
+
+def test_organize_media_wrong_extension():
+    with TemporaryDirectory() as tmpdir:
+        tmpdir = Path(tmpdir)
+        source_dir = tmpdir / 'screenshots'
+        source_dir.mkdir()
+        txt_file = source_dir / 'notes.txt'
+        txt_file.write_text('not an image')
+        mtime = datetime(2025, 1, 20, 14, 30, 45).timestamp()
+        os.utime(txt_file, (mtime, mtime))
+        collation_dir = tmpdir / '2025-01-20_2025-01-26'
+        collation_dir.mkdir()
+        config = MediaConfig(
+            sources=[MediaSource(folder=source_dir, operation='copy', subfolder='media')],
+            extensions=['.png'],
+            enabled=True
+        )
+        start = datetime(2025, 1, 20, 0, 0, 0)
+        end = datetime(2025, 1, 26, 23, 59, 59)
+        mapping = organize_media_for_collation(collation_dir, start, end, config)
+        assert len(mapping) == 0
+
 def test_update_markdown_no_mapping():
     with TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)

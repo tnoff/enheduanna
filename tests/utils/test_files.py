@@ -29,3 +29,15 @@ def test_normalize_filename():
     assert normalize_file_name('foo') == 'foo'
     assert normalize_file_name('temp.foo') == 'temp.foo'
     assert normalize_file_name('go giants!') == 'go giants_'
+
+def test_list_files_skips_md_directories():
+    with TemporaryDirectory() as tmpdir:
+        weekly_dir = Path(tmpdir) / '2025-02-10_2025-02-16'
+        weekly_dir.mkdir()
+        tmp1 = weekly_dir / '2025-02-11.md'
+        tmp1.touch()
+        md_dir = weekly_dir / '2025-02-12.md'
+        md_dir.mkdir()
+        files = list_markdown_files(Path(tmpdir))
+        assert len(files) == 1
+        assert files[0] == tmp1
