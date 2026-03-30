@@ -51,6 +51,18 @@ collation:
         c = Config.from_yaml(path)
         assert c.collation.type == CollationType.MONTHLY
 
+def test_load_yaml_non_dict():
+    test_data = '''---
+- foo
+- bar
+'''
+    with NamedTemporaryFile() as tmp:
+        path = Path(tmp.name)
+        path.write_text(test_data)
+        c = Config.from_yaml(path)
+        assert c.file is not None
+        assert c.collation is not None
+
 def test_load_yaml_auto_generate():
     test_data = '''---
 file:

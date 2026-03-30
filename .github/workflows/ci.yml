@@ -4,6 +4,8 @@ on:
   - pull_request
 
 jobs:
+  check-pins:
+    uses: tnoff/github-workflows/.github/workflows/check-action-pins.yml@a67b99238aa5f23f5015cab31d81da16101f42f1
   spellcheck:
       name: Spellcheck
       runs-on: ubuntu-24.04
@@ -21,7 +23,7 @@ jobs:
       contents: read
     strategy:
       matrix:
-        python-version: ['3.11', '3.12', '3.13']
+        python-version: ['3.11', '3.12', '3.13', '3.14']
     steps:
     - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
     - name: Set up Python ${{ matrix.python-version }}

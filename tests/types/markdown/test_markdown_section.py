@@ -94,3 +94,7 @@ def test_check_contents_empty():
     assert m.is_empty() == False
     m = MarkdownSection('2025-02-16', '- ')
     assert m.is_empty() == True
+
+def test_str():
+    m = MarkdownSection('My Title', 'some contents')
+    assert str(m) == 'My Title'

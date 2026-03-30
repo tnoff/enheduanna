@@ -67,6 +67,13 @@ These bits are nested on the 3rd loop'''
         assert nested_section.contents == 'These bits are nested on the 3rd loop'
         assert nested_section.level == 3
 
+def test_str():
+    with NamedTemporaryFile(suffix='.md') as tmp:
+        path = Path(tmp.name)
+        path.write_text('# Title\n')
+        mf = MarkdownFile.from_file(path)
+        assert str(mf) == str(path)
+
 def test_read_and_write_same_file_after_removal():
     file_text = '''# 2025-02-20
 

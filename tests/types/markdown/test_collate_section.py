@@ -15,3 +15,6 @@ def test_validators():
     with raises(ValidationError) as e:
         CollateSection('Test', regex='foo', groupBy='bar')
     assert 'GroupBy field must be gathered in regex' in str(e.value)
+
+def test_str():
+    assert str(CollateSection('My Section')) == 'My Section'

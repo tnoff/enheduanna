@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code
 COPY enheduanna/ ./enheduanna/
-COPY setup.py .
+COPY pyproject.toml .
 COPY VERSION .
 
 # Install the application
