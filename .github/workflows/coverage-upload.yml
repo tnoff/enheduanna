@@ -6,7 +6,7 @@ on:
 
 jobs:
   store-coverage:
-    uses: tnoff/github-workflows/.github/workflows/coverage-store.yml@a67b99238aa5f23f5015cab31d81da16101f42f1
+    uses: tnoff/github-workflows/.github/workflows/coverage-store.yml@5a3473dcbf9095c0e2137fa209bf1d10bc9f791f
     with:
       coverage_source: enheduanna
       install_command: pip install -r requirements.txt -r tests/requirements.txt
