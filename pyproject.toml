@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "enheduanna"
+description = "Enheduanna Note Tool"
+dynamic = ["version", "dependencies"]
+authors = [
+    {name = "Tyler D. North", email = "me@tyler-north.com"}
+]
+
+[project.scripts]
+enheduanna = "enheduanna.cli:main"
+
+[tool.setuptools.dynamic]
+version = {file = "VERSION"}
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools.packages.find]
+exclude = ["tests*"]
