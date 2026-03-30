@@ -12,8 +12,8 @@ Named after Enheduanna, sometimes considered the first known author in history.
 
 ### Running Tests
 ```bash
-# Run tests with coverage (requires 95% coverage)
-pytest --cov=enheduanna --cov-fail-under=95 tests/
+# Run tests with coverage (requires 100% coverage)
+pytest --cov=enheduanna --cov-fail-under=100 tests/
 
 # Run tests for a specific file
 pytest tests/test_cli.py
@@ -118,4 +118,4 @@ Tests use pytest with freezegun for date mocking and pytest-cov for coverage rep
 
 - Pylint is configured with many checks disabled (see `.pylintrc`)
 - Disabled checks include: line-too-long, too-many-arguments, too-many-branches, invalid-name, etc.
-- Coverage threshold: 95%
+- Coverage threshold: 100%
