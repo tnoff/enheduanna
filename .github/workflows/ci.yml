@@ -6,6 +6,16 @@ on:
 jobs:
   check-pins:
     uses: tnoff/github-workflows/.github/workflows/check-action-pins.yml@a67b99238aa5f23f5015cab31d81da16101f42f1
+  coverage:
+    uses: tnoff/github-workflows/.github/workflows/coverage-check.yml@5a3473dcbf9095c0e2137fa209bf1d10bc9f791f
+    permissions:
+      contents: read
+      actions: read
+    with:
+      coverage_source: enheduanna
+      install_command: pip install -r requirements.txt -r tests/requirements.txt
+      python_version: 3.14
+      fail_on_diff_cover: true
   spellcheck:
       name: Spellcheck
       runs-on: ubuntu-24.04
