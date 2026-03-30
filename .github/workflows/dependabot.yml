@@ -10,7 +10,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: tnoff/github-workflows/.github/workflows/dependabot-auto-approve.yml@bbe97497e09b0f728446f9f3a93daa897e2d64a1
+    uses: tnoff/github-workflows/.github/workflows/dependabot-auto-approve.yml@5a3473dcbf9095c0e2137fa209bf1d10bc9f791f
     with:
       file_pattern: 'tests/**'
       allowed_update_types: 'major,minor,patch'
