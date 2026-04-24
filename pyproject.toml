@@ -5,9 +5,26 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "enheduanna"
 description = "Enheduanna Note Tool"
-dynamic = ["version", "dependencies"]
+dynamic = ["version"]
 authors = [
     {name = "Tyler D. North", email = "me@tyler-north.com"}
+]
+dependencies = [
+    "click==8.3.3",
+    "pathlib==1.0.1",
+    "pyaml_env==1.2.2",
+    "pydantic==2.13.3",
+]
+
+[project.optional-dependencies]
+test = [
+    "pylint==4.0.5",
+    "pytest==9.0.3",
+    "pytest-cov==7.1.0",
+    "pytest-freezegun==0.4.2",
+    # Currently required for pytest-freezegun, can remove once they have that fixed
+    "setuptools==82.0.1",
+    "tox==4.53.0",
 ]
 
 [project.scripts]
@@ -15,7 +32,6 @@ enheduanna = "enheduanna.cli:main"
 
 [tool.setuptools.dynamic]
 version = {file = "VERSION"}
-dependencies = {file = ["requirements.txt"]}
 
 [tool.setuptools.packages.find]
 exclude = ["tests*"]

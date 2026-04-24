@@ -1,4 +1,0 @@
-click==8.3.3
-pathlib==1.0.1
-pyaml_env==1.2.2
-pydantic==2.13.3
