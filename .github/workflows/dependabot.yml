@@ -16,7 +16,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: tnoff/github-workflows/.github/workflows/dependabot-auto-approve.yml@1dcefc7c5dfeb21105e3256bf21fc97b8552252e
+    uses: tnoff/github-workflows/.github/workflows/dependabot-auto-approve.yml@06f676738efdf3f327af0059b3ce0c6f187e1b5c
     with:
       dependency_groups: 'test-dependencies'
       allowed_update_types: 'major,minor,patch'
@@ -27,7 +27,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: tnoff/github-workflows/.github/workflows/dependabot-auto-approve.yml@1dcefc7c5dfeb21105e3256bf21fc97b8552252e
+    uses: tnoff/github-workflows/.github/workflows/dependabot-auto-approve.yml@06f676738efdf3f327af0059b3ce0c6f187e1b5c
     with:
       file_pattern: '**'
       allowed_update_types: 'patch'
@@ -38,7 +38,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: tnoff/github-workflows/.github/workflows/dependabot-auto-approve.yml@1dcefc7c5dfeb21105e3256bf21fc97b8552252e
+    uses: tnoff/github-workflows/.github/workflows/dependabot-auto-approve.yml@06f676738efdf3f327af0059b3ce0c6f187e1b5c
     with:
       file_pattern: '.github/workflows/ci.yml'
       allowed_update_types: 'major,minor,patch'
