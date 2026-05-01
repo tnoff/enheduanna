@@ -18,6 +18,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
+    "bandit==1.9.4",
     "pylint==4.0.5",
     "pytest==9.0.3",
     "pytest-cov==7.1.0",

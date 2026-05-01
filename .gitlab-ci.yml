@@ -14,6 +14,12 @@ include:
   - project: 'tnoff-projects/github-workflows'
     ref: e48cecee88a1b534e38b799a6fcf1eb2e87e0d66
     file: '/gitlab/renovate.yml'
+  - project: 'tnoff-projects/github-workflows'
+    ref: de98748c6a9dc92ded91f5d334563199bf129827
+    file: '/gitlab/trufflehog.yml'
+  - project: 'tnoff-projects/github-workflows'
+    ref: c03078a2846b049368a6723fa022a0628de34234
+    file: '/gitlab/trufflehog-image.yml'
 
 stages:
   - validate
@@ -83,6 +89,38 @@ generate-tox:
       when: manual
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"
+
+
+spellcheck:
+  stage: validate
+  image: python:3.14-slim
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq aspell aspell-en
+    - pip install pyspelling
+  script:
+    - pyspelling -c .spellcheck/spellcheck.yml --name Markdown
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_SOURCE_PROJECT_ID != $CI_PROJECT_ID
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+trufflehog:
+  extends: .trufflehog
+  stage: validate
+  rules:
+    # Fork MRs require a project member to manually trigger jobs — prevents untrusted code from running CI automatically
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_SOURCE_PROJECT_ID != $CI_PROJECT_ID
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+trufflehog-image:
+  extends: .trufflehog-image
+  stage: validate
+  rules:
+    # Fork MRs require a project member to manually trigger jobs — prevents untrusted code from running CI automatically
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_SOURCE_PROJECT_ID != $CI_PROJECT_ID
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 tox-pipeline:
   stage: test
