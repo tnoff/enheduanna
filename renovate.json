@@ -7,16 +7,14 @@
   "rebaseWhen": "behind-base-branch",
   "packageRules": [
     {
-      "matchDepTypes": ["devDependencies"],
-      "matchPackageNames": ["pytest", "tox", "pylint", "pytest-cov", "pytest-freezegun"],
-      "matchUpdateTypes": ["major", "minor", "patch"],
+      "matchPackageNames": ["pytest", "pytest-cov", "pytest-freezegun", "tox", "pylint", "bandit"],
       "additionalBranchPrefix": "test-",
       "automerge": true
     },
     {
-      "matchUpdateTypes": ["patch"],
-      "additionalBranchPrefix": "dev-",
-      "automerge": true
+      "matchManagers": ["pep621", "dockerfile"],
+      "matchPackageNames": ["!pytest", "!pytest-cov", "!pytest-freezegun", "!tox", "!pylint", "!bandit"],
+      "additionalBranchPrefix": "dev-"
     }
   ]
 }
