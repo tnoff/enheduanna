@@ -1,49 +1,8 @@
 # AGENTS.md
 
-This file provides guidance to AI coding agents when working with code in this repository.
-
-## Project Overview
-
-Enheduanna is a CLI tool for creating and managing entries in Markdown. It organizes entries into weekly/monthly sub-directories and provides "collate" functionality to combine multiple entries into summaries and documentation files.
-
-Named after Enheduanna, sometimes considered the first known author in history.
-
-## Development Commands
-
-### Running Tests
-```bash
-# Run tests with coverage (requires 100% coverage)
-pytest --cov=enheduanna --cov-fail-under=100 tests/
-
-# Run tests for a specific file
-pytest tests/test_cli.py
-
-# Run tests for a specific test function
-pytest tests/test_cli.py::test_function_name
-
-# Run with tox (tests against multiple Python versions)
-tox
-
-# Run with specific Python version
-tox -e py311
-tox -e py312
-tox -e py313
-```
-
-### Linting
-```bash
-# Run pylint
-pylint enheduanna/
-```
-
-### Installation
-```bash
-# Install in development mode
-pip install -e .
-
-# Install with requirements
-pip install -r requirements.txt
-```
+Guidance for AI coding agents working in this repository. For end-user
+CLI usage and configuration see [README.md](README.md); for setup,
+tests, and linting see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## Architecture
 
@@ -114,8 +73,13 @@ Tests mirror the source structure under `tests/`:
 
 Tests use pytest with freezegun for date mocking and pytest-cov for coverage reporting.
 
-## Code Style
+## Conventions
 
-- Pylint is configured with many checks disabled (see `.pylintrc`)
-- Disabled checks include: line-too-long, too-many-arguments, too-many-branches, invalid-name, etc.
-- Coverage threshold: 100%
+- **100% coverage** is enforced by `tox` (`--cov-fail-under=100`). New
+  code needs tests exercising every branch.
+- `bandit` runs in `tox` — avoid `subprocess`, `eval`, or anything else
+  that requires a `# nosec` annotation unless absolutely necessary.
+- Pylint's `.pylintrc` intentionally disables several checks
+  (`line-too-long`, `too-many-arguments`, `invalid-name`, etc.) — don't
+  reintroduce them via per-file pragmas; if a rule is broadly disabled,
+  it's deliberate.
