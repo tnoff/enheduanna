@@ -1,36 +1,36 @@
 include:
   - project: 'tnoff-projects/github-workflows'
-    ref: a5e9849f148c62b128b033e79676ffb8ab4ee129
+    ref: 04c5fd3ccff6dca038591aafcc321d759630aad1
     file: '/gitlab/tag.yml'
   - project: 'tnoff-projects/github-workflows'
-    ref: a5e9849f148c62b128b033e79676ffb8ab4ee129
+    ref: 04c5fd3ccff6dca038591aafcc321d759630aad1
     file: '/gitlab/discord-notify.yml'
   - project: 'tnoff-projects/github-workflows'
-    ref: a5e9849f148c62b128b033e79676ffb8ab4ee129
+    ref: 04c5fd3ccff6dca038591aafcc321d759630aad1
     file: '/gitlab/renovate.yml'
   - project: 'tnoff-projects/github-workflows'
-    ref: a5e9849f148c62b128b033e79676ffb8ab4ee129
+    ref: 04c5fd3ccff6dca038591aafcc321d759630aad1
     file: '/gitlab/branch-cleanup.yml'
   - project: 'tnoff-projects/github-workflows'
-    ref: a5e9849f148c62b128b033e79676ffb8ab4ee129
+    ref: 04c5fd3ccff6dca038591aafcc321d759630aad1
     file: '/gitlab/trufflehog.yml'
   - project: 'tnoff-projects/github-workflows'
-    ref: a5e9849f148c62b128b033e79676ffb8ab4ee129
+    ref: 04c5fd3ccff6dca038591aafcc321d759630aad1
     file: '/gitlab/trufflehog-image.yml'
   - project: 'tnoff-projects/github-workflows'
-    ref: a5e9849f148c62b128b033e79676ffb8ab4ee129
+    ref: 04c5fd3ccff6dca038591aafcc321d759630aad1
     file: '/gitlab/bump-version.yml'
   - project: 'tnoff-projects/github-workflows'
-    ref: a5e9849f148c62b128b033e79676ffb8ab4ee129
+    ref: 04c5fd3ccff6dca038591aafcc321d759630aad1
     file: '/gitlab/release.yml'
   - project: 'tnoff-projects/github-workflows'
-    ref: a5e9849f148c62b128b033e79676ffb8ab4ee129
+    ref: 04c5fd3ccff6dca038591aafcc321d759630aad1
     file: '/gitlab/buildkit-build-check.yml'
   - project: 'tnoff-projects/github-workflows'
-    ref: a5e9849f148c62b128b033e79676ffb8ab4ee129
+    ref: 04c5fd3ccff6dca038591aafcc321d759630aad1
     file: '/gitlab/tox-pipeline.yml'
   - project: 'tnoff-projects/github-workflows'
-    ref: a5e9849f148c62b128b033e79676ffb8ab4ee129
+    ref: 04c5fd3ccff6dca038591aafcc321d759630aad1
     file: '/gitlab/spellcheck.yml'
 
 default:
