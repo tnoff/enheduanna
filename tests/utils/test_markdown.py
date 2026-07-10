@@ -57,7 +57,7 @@ def test_combine_markdown_sections():
 
         mf1 = MarkdownFile(path1, ms1)
         mf2 = MarkdownFile(path2, ms2)
-        result, document = generate_markdown_collation([mf1, mf2], [cs1], ['Follow Ups'])
+        result, document = generate_markdown_collation([mf1, mf2], [cs1], ['Follow Ups'], Path(tmpdir) / 'documents')
         assert len(result) == 1
         assert len(document) == 2
         assert result[0].title == 'Work Done'
@@ -103,7 +103,7 @@ def test_merge_markdown_sections():
         mf2 = MarkdownFile(path2, doc2)
         mf3 = MarkdownFile(path3, doc3)
 
-        result = generate_markdown_merge([mf1, mf2, mf3], 'Combined Operations Runbook')
+        result = generate_markdown_merge([mf1, mf2, mf3], 'Combined Operations Runbook', docs_dir)
 
         assert result.title == 'Combined Operations Runbook'
         assert result.level == 1
@@ -152,7 +152,7 @@ def test_combine_markdown_sections_recursive():
     with TemporaryDirectory() as tmpdir:
         path = Path(tmpdir) / '2025-02-10.md'
         mf = MarkdownFile(path, outer)
-        result, _ = generate_markdown_collation([mf], [cs], [])
+        result, _ = generate_markdown_collation([mf], [cs], [], Path(tmpdir) / 'documents')
         assert len(result) == 1
         assert result[0].title == 'Work Done'
 

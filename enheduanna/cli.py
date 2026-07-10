@@ -10,6 +10,7 @@ from enheduanna.types.markdown.markdown_section import MarkdownSection
 
 from enheduanna.utils.collation import create_parent_folder
 from enheduanna.utils.files import list_markdown_files, find_last_markdown_file, normalize_file_name
+from enheduanna.utils.links import rewrite_section_links
 from enheduanna.utils.markdown import generate_markdown_collation, generate_markdown_merge, remove_empty_sections
 from enheduanna.utils.media import organize_media_for_collation, update_markdown_media_references, parse_collation_folder_name
 
@@ -32,6 +33,11 @@ def ensure_entry_file(parent_folder: Path, today: date, config: Config,
         if last_markdown_file and section.rollover:
             existing_section = last_markdown_file.root_section.remove_section(section.title)
             if existing_section:
+                # Relative links resolve against the source file's dir; fix them for the new location.
+                # The section is already removed from last_markdown_file, so its remaining root
+                # holds the headings that stayed behind (for cross-file anchor rewriting).
+                rewrite_section_links(existing_section, last_markdown_file.file_path, parent_folder,
+                                      last_markdown_file.root_section)
                 markdown_contents.add_section(existing_section)
                 last_markdown_file.write()
                 continue
@@ -85,7 +91,7 @@ def collate(context: click.Context, file_dir: str, title, collate_name: str):
         markdown_files.append(MarkdownFile.from_file(path))
     # Ignore sections set automatically but not in collate
     ignore_sections = set(i.title for i in context.obj.file.entry_sections) - set([i.title for i in context.obj.file.collate_sections]) #pylint:disable=consider-using-set-comprehension
-    combos, documents = generate_markdown_collation(markdown_files, context.obj.file.collate_sections, ignore_sections)
+    combos, documents = generate_markdown_collation(markdown_files, context.obj.file.collate_sections, ignore_sections, context.obj.file.document_folder)
     new_document = MarkdownSection(title, '')
     for section in combos:
         section.level = 2
@@ -124,7 +130,7 @@ def merge(file_dir: str, output_file: str, title):
     # Include all markdown files, not just entries
     for path in list_markdown_files(file_dir, only_include_entry=False):
         markdown_files.append(MarkdownFile.from_file(path))
-    merged_section = generate_markdown_merge(markdown_files, title)
+    merged_section = generate_markdown_merge(markdown_files, title, output_file.parent)
     output_file.write_text(merged_section.write())
     click.echo(f'Merged data written to file {output_file}')
 

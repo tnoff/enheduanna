@@ -30,9 +30,17 @@ def find_header(line_input: str) -> int:
     '''
     Find header if it exists in line and returns level
 
+    Only counts leading '#' characters that form an ATX heading (followed by a
+    space or end of line), so inline '#' such as anchor links do not register.
+
     line_input : Line that was inputed
     '''
-    return len(line_input) - len(line_input.replace('#', ''))
+    stripped = line_input.lstrip()
+    level = len(stripped) - len(stripped.lstrip('#'))
+    # Not a heading unless the leading '#'s are followed by a space or nothing
+    if level == 0 or stripped[level:level + 1] not in ('', ' '):
+        return 0
+    return level
 
 def generate_markdown_sections(markdown_text: str, current_tab: int = 1) -> List[MarkdownSection]:
     '''
