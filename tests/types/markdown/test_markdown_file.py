@@ -1,7 +1,37 @@
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-from enheduanna.types.markdown.markdown_file import MarkdownFile
+from enheduanna.types.markdown.markdown_file import MarkdownFile, find_header
+
+def test_find_header_ignores_inline_hash():
+    # A leading ATX header still counts
+    assert find_header('## Work Done') == 2
+    assert find_header('# Title') == 1
+    # Inline '#' (anchor links, comments) must not register as a header
+    assert find_header('See [work](#work-done) and [detail](#detail)') == 0
+    assert find_header('- item with a # in it') == 0
+    # '#' not followed by a space is not an ATX header
+    assert find_header('#notaheader') == 0
+
+def test_markdown_section_keeps_anchor_link_line_as_contents():
+    input_text = '''# 2025-01-01
+
+## Steps
+
+See [work](#work-done) for context
+
+### Detail
+
+more'''
+    with NamedTemporaryFile() as tmp:
+        path = Path(tmp.name)
+        path.write_text(input_text)
+        mf = MarkdownFile.from_file(path)
+        steps = mf.root_section.sections[0]
+        assert steps.title == 'Steps'
+        # The anchor-link line stays as contents rather than becoming a section title
+        assert steps.contents == 'See [work](#work-done) for context'
+        assert steps.sections[0].title == 'Detail'
 
 def test_markdown_section_from_text():
     input_text = '''# 2025-01-01

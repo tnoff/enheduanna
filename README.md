@@ -236,6 +236,16 @@ sudo reboot
 
 The contents of the section that was moved will also be removed from the original notes file, in this case `2025-01-20.md`.
 
+### Relative Link Handling
+
+Whenever a section is moved to a file in a different folder — extracted into a document, merged into a combined file, or rolled over into a new week's entry — its Markdown file links (`[text](./path)` and `![alt](./path)`) are adjusted so they still resolve to the same file from the new location:
+
+- **Relative file links** are re-based on the directory change (e.g. `./attachments/spec.pdf` becomes `../notes/2025-01-20_2025-01-26/attachments/spec.pdf`).
+- **Anchor links** (`[text](#heading)`) are handled by whether the heading moved with them. If the target heading is inside the moved section it is left as-is. If the heading stayed behind in the original file, the anchor is rewritten into a cross-file link back to that file (e.g. `#work-done` becomes `../notes/2025-01-20_2025-01-26/2025-01-20.md#work-done`). Anchors are matched to headings using GitHub-style slugs.
+- **Absolute paths, `~/` home paths, and URLs** are left untouched.
+
+Links in the `summary.md` file are unaffected, since it is written into the same folder as the entries.
+
 ## Merge
 
 Use the `merge` command to combine all markdown files from a folder into a single markdown file. Unlike `collate`, the merge command:
