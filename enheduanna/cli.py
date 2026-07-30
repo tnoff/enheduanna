@@ -13,6 +13,7 @@ from enheduanna.utils.files import list_markdown_files, find_last_markdown_file,
 from enheduanna.utils.links import rewrite_section_links
 from enheduanna.utils.markdown import generate_markdown_collation, generate_markdown_merge, remove_empty_sections
 from enheduanna.utils.media import organize_media_for_collation, update_markdown_media_references, parse_collation_folder_name
+from enheduanna.utils.toc import build_summary_toc_section, update_root_index
 
 
 def ensure_entry_file(parent_folder: Path, today: date, config: Config,
@@ -92,7 +93,21 @@ def collate(context: click.Context, file_dir: str, title, collate_name: str):
     # Ignore sections set automatically but not in collate
     ignore_sections = set(i.title for i in context.obj.file.entry_sections) - set([i.title for i in context.obj.file.collate_sections]) #pylint:disable=consider-using-set-comprehension
     combos, documents = generate_markdown_collation(markdown_files, context.obj.file.collate_sections, ignore_sections, context.obj.file.document_folder)
+    # Organize media files if configured, before building the summary so the table
+    # of contents can list them. Move/copy the files now, but defer the in-note
+    # reference rewrite until after remove_empty_sections: that cleanup rewrites
+    # each entry from its in-memory section tree (which still holds the original
+    # reference) and would otherwise clobber the rewritten path.
+    date_range = parse_collation_folder_name(file_dir.name, context.obj.file.date_output_format)
+    filename_mapping = {}
+    if date_range:
+        start_date, end_date = date_range
+        filename_mapping = organize_media_for_collation(file_dir, start_date, end_date, context.obj.file.media)
     new_document = MarkdownSection(title, '')
+    if context.obj.file.toc.enabled:
+        toc_section = build_summary_toc_section(file_dir, markdown_files, context.obj.file.media.extensions, context.obj.file.toc)
+        if toc_section:
+            new_document.add_section(toc_section)
     for section in combos:
         section.level = 2
         new_document.add_section(section)
@@ -104,15 +119,11 @@ def collate(context: click.Context, file_dir: str, title, collate_name: str):
         new_file = MarkdownFile(new_path, document)
         new_file.write()
         click.echo(f'Writing document to file {new_path}')
-    # Organize media files if configured. Move/copy the files now, but defer the
-    # in-note reference rewrite until after remove_empty_sections: that cleanup
-    # rewrites each entry from its in-memory section tree (which still holds the
-    # original reference) and would otherwise clobber the rewritten path.
-    date_range = parse_collation_folder_name(file_dir.name, context.obj.file.date_output_format)
-    filename_mapping = {}
-    if date_range:
-        start_date, end_date = date_range
-        filename_mapping = organize_media_for_collation(file_dir, start_date, end_date, context.obj.file.media)
+    # Update the root index that links to each collation summary
+    if context.obj.file.toc.enabled and context.obj.file.toc.root_index_enabled:
+        index_path = update_root_index(context.obj.file.entries_folder, collate_name, context.obj.file.toc)
+        if index_path:
+            click.echo(f'Updated root index {index_path}')
     # Clean up files
     click.echo(f'Cleaning up files in dir {file_dir}')
     remove_empty_sections(markdown_files)

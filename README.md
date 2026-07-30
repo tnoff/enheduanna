@@ -246,6 +246,24 @@ Whenever a section is moved to a file in a different folder — extracted into a
 
 Links in the `summary.md` file are unaffected, since it is written into the same folder as the entries.
 
+### Table of Contents
+
+When `collate` runs it adds a `## Contents` section to the top of `summary.md` linking to the pages that make up that folder:
+
+- **Entries** — a link to each daily entry file in the folder.
+- **Media** — a link to each collated media file (found by scanning the folder, so media from earlier runs is included too).
+
+It also creates or refreshes a root index file (`index.md` by default) in your entries folder, linking to every collation `summary.md`, newest first:
+
+```
+# Notes Index
+
+- [2025-01-27 -> 2025-02-02](./2025-01-27_2025-02-02/summary.md)
+- [2025-01-20 -> 2025-01-26](./2025-01-20_2025-01-26/summary.md)
+```
+
+This is enabled by default. See the [Table of Contents](#table-of-contents-1) config options to customize or disable it.
+
 ## Merge
 
 Use the `merge` command to combine all markdown files from a folder into a single markdown file. Unlike `collate`, the merge command:
@@ -452,6 +470,35 @@ file:
    - Markdown references are updated:
      - `![screenshot](./media/screenshots/2025-01-20_14-30-45.png)`
      - `![diagram](./media/downloads/2025-01-21_09-15-30.jpg)`
+
+### Table of Contents
+
+Control the link tables that `collate` generates in `summary.md` and at the root of your entries folder. Enabled by default; set `enabled: false` to turn everything off.
+
+| Param | Type | Description |
+| ----- | ---- | ----------- |
+| enabled | boolean | Master switch for both the summary section and the root index (default: `true`) |
+| summary_title | str | Heading of the section added to `summary.md` (default: `Contents`) |
+| include_entries | boolean | List the daily entry files (default: `true`) |
+| include_media | boolean | List collated media files (default: `true`) |
+| root_index_enabled | boolean | Create/refresh the root index file (default: `true`) |
+| root_index_name | str | Name of the root index file within the entries folder (default: `index.md`) |
+| root_index_title | str | Heading of the root index file (default: `Notes Index`) |
+
+Example config:
+
+```yaml
+---
+file:
+  toc:
+    enabled: true
+    summary_title: Contents
+    include_entries: true
+    include_media: true
+    root_index_enabled: true
+    root_index_name: index.md
+    root_index_title: Notes Index
+```
 
 ### Collation Settings
 

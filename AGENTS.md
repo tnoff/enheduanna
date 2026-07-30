@@ -26,6 +26,8 @@ The codebase uses Pydantic dataclasses for type safety and validation:
 
 - **Markdown Utils** (`enheduanna/utils/markdown.py`): Core collation and merge logic. `generate_markdown_collation()` combines specific sections with regex grouping and document extraction. `generate_markdown_merge()` provides simpler merging of all sections without filtering.
 
+- **TOC Utils** (`enheduanna/utils/toc.py`): Builds table-of-contents links during `collate`. `build_summary_toc_section()` returns a `Contents` section linking to entry files and collated media (media found by scanning the folder). `update_root_index()` writes/refreshes a root index file linking to every collation summary. Controlled by `TocConfig` (`file.toc`).
+
 ### CLI Flow
 
 The CLI (`enheduanna/cli.py`) has three main commands:
@@ -38,9 +40,12 @@ The CLI (`enheduanna/cli.py`) has three main commands:
 
 2. **collate**: Combines entries into summaries
    - Reads all markdown files in a directory
+   - Organizes configured media into the folder (before building the summary so it can be listed)
    - Combines configured collate sections (e.g., "Work Done")
    - Groups content by regex patterns (e.g., Jira tickets)
+   - Adds a `Contents` table-of-contents section (entries + media) to the summary
    - Extracts non-standard sections as separate documentation files
+   - Creates/refreshes a root index file linking to every collation summary
    - Removes empty sections from source files after collation
    - Rewrites organized-media references in entries *after* the empty-section cleanup, since that cleanup rewrites each entry from its in-memory tree and would otherwise revert the reference
 

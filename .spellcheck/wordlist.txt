@@ -36,3 +36,4 @@ MediaSource
 yaml
 gif
 webp
+toc

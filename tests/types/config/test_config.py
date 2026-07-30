@@ -63,6 +63,38 @@ def test_load_yaml_non_dict():
         assert c.file is not None
         assert c.collation is not None
 
+def test_load_yaml_toc_defaults():
+    test_data = '''---
+file:
+  entries_folder: /home/user/foo
+'''
+    with NamedTemporaryFile() as tmp:
+        path = Path(tmp.name)
+        path.write_text(test_data)
+        c = Config.from_yaml(path)
+        assert c.file.toc.enabled is True
+        assert c.file.toc.summary_title == 'Contents'
+        assert c.file.toc.root_index_enabled is True
+        assert c.file.toc.root_index_name == 'index.md'
+
+def test_load_yaml_toc_override():
+    test_data = '''---
+file:
+  toc:
+    enabled: false
+    summary_title: Table of Contents
+    include_media: false
+    root_index_name: README.md
+'''
+    with NamedTemporaryFile() as tmp:
+        path = Path(tmp.name)
+        path.write_text(test_data)
+        c = Config.from_yaml(path)
+        assert c.file.toc.enabled is False
+        assert c.file.toc.summary_title == 'Table of Contents'
+        assert c.file.toc.include_media is False
+        assert c.file.toc.root_index_name == 'README.md'
+
 def test_load_yaml_auto_generate():
     test_data = '''---
 file:

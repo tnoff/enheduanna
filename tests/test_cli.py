@@ -17,6 +17,7 @@ from enheduanna.types.config import Config
 from enheduanna.types.config.collation import CollationConfig
 from enheduanna.types.config.file import FileConfig
 from enheduanna.types.config.media import MediaConfig, MediaSource
+from enheduanna.types.config.toc import TocConfig
 from enheduanna.types.markdown.markdown_section import MarkdownSection
 
 DATA_PATH = Path(__file__).parent / 'data'
@@ -67,10 +68,14 @@ def test_collate():
         runner = CliRunner()
         result = runner.invoke(main, ['-c', config_file, 'collate', str(config.file.entries_folder / '2025-02-24_2025-03-02')])
 
-        assert result.output == f'Collation data written to file {config.file.entries_folder}/2025-02-24_2025-03-02/summary.md\nWriting document to file {config.file.document_folder}/2025-02-27 How to Answer Question.md\nWriting document to file {config.file.document_folder}/2025-02-27 Another Specific Question.md\nCleaning up files in dir {config.file.entries_folder}/2025-02-24_2025-03-02\n'
+        assert result.output == f'Collation data written to file {config.file.entries_folder}/2025-02-24_2025-03-02/summary.md\nWriting document to file {config.file.document_folder}/2025-02-27 How to Answer Question.md\nWriting document to file {config.file.document_folder}/2025-02-27 Another Specific Question.md\nUpdated root index {config.file.entries_folder}/index.md\nCleaning up files in dir {config.file.entries_folder}/2025-02-24_2025-03-02\n'
         expected_summary = config.file.entries_folder / '2025-02-24_2025-03-02' / 'summary.md'
         assert expected_summary.exists()
-        assert expected_summary.read_text() == '# Summary | 2025-02-24 -> 2025-03-02\n\n## Work Done\n\n- Writing up customer support (ABC-1234)\n- Doing some testing for customer fix (ABC-1234)\n\n- Helping Arya fix up her test suite\n- Doing self-reviews for the year\n'
+        assert expected_summary.read_text() == '# Summary | 2025-02-24 -> 2025-03-02\n\n## Contents\n\n### Entries\n\n- [2025-02-27](./2025-02-27.md)\n- [2025-02-28](./2025-02-28.md)\n\n## Work Done\n\n- Writing up customer support (ABC-1234)\n- Doing some testing for customer fix (ABC-1234)\n\n- Helping Arya fix up her test suite\n- Doing self-reviews for the year\n'
+
+        expected_index = config.file.entries_folder / 'index.md'
+        assert expected_index.exists()
+        assert expected_index.read_text() == '# Notes Index\n\n- [2025-02-24 -> 2025-03-02](./2025-02-24_2025-03-02/summary.md)\n'
 
         expected_doc1 = config.file.document_folder / '2025-02-27 How to Answer Question.md'
         assert expected_doc1.exists()
@@ -284,3 +289,38 @@ def test_collate_with_media():
             embed_after = embed.read_text()
             assert '![shot](./media/2025-02-26_12-00-00.png)' in embed_after
             assert 'screenshot.png' not in embed_after
+
+            # Collated media is listed in the summary table of contents
+            summary = (note_dir / '2025-02-24_2025-03-02' / 'summary.md').read_text()
+            assert '### Media\n\n- [2025-02-26_12-00-00.png](./media/2025-02-26_12-00-00.png)' in summary
+            # Root index is created linking to the summary
+            assert (note_dir / 'index.md').exists()
+
+
+@freeze_time('2025-03-01 12:00:00', tz_offset=0)
+def test_collate_toc_disabled():
+    data_dir = DATA_PATH / '2025-02-24_2025-03-02'
+    with TemporaryDirectory() as tmpdir:
+        tmpdir = Path(tmpdir)
+        note_dir = tmpdir / 'notes'
+        note_dir.mkdir()
+        doc_dir = tmpdir / 'docs'
+        doc_dir.mkdir()
+
+        file_config = FileConfig(entries_folder=note_dir, document_folder=doc_dir,
+                                 toc=TocConfig(enabled=False))
+        config = Config(file_config, CollationConfig())
+
+        with NamedTemporaryFile() as tmp_config:
+            config_path = Path(tmp_config.name)
+            config_path.write_text(dump(RootModel[Config](config).model_dump_json()))
+
+            copy_tree(str(data_dir), str(note_dir / '2025-02-24_2025-03-02'))
+            runner = CliRunner()
+            result = runner.invoke(main, ['-c', str(config_path), 'collate',
+                                         str(note_dir / '2025-02-24_2025-03-02')])
+            assert result.exit_code == 0
+            summary = (note_dir / '2025-02-24_2025-03-02' / 'summary.md').read_text()
+            assert '## Contents' not in summary
+            assert not (note_dir / 'index.md').exists()
+            assert 'Updated root index' not in result.output

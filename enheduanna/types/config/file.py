@@ -9,6 +9,7 @@ from enheduanna.defaults import ENTRIES_DIR_DEFAULT, DOCUMENT_DIR_DEFAULT, DATE_
 from enheduanna.types.markdown.markdown_section import MarkdownSection
 from enheduanna.types.markdown.collate_section import CollateSection
 from enheduanna.types.config.media import MediaConfig
+from enheduanna.types.config.toc import TocConfig
 
 ENTRY_SECTIONS_DEFAULT = [
     MarkdownSection('Work Done', '- ', level=2),
@@ -33,6 +34,7 @@ class FileConfig:
     entry_sections: List[MarkdownSection] = Field(default_factory=list)
     collate_sections: List[CollateSection] = Field(default_factory=list)
     media: MediaConfig = Field(default_factory=MediaConfig)
+    toc: TocConfig = Field(default_factory=TocConfig)
 
     @model_validator(mode='after')
     def validate_entry_sections(self) -> Self:
