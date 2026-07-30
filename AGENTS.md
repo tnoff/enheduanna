@@ -42,6 +42,7 @@ The CLI (`enheduanna/cli.py`) has three main commands:
    - Groups content by regex patterns (e.g., Jira tickets)
    - Extracts non-standard sections as separate documentation files
    - Removes empty sections from source files after collation
+   - Rewrites organized-media references in entries *after* the empty-section cleanup, since that cleanup rewrites each entry from its in-memory tree and would otherwise revert the reference
 
 3. **merge**: Merges markdown files into a single file
    - Primarily used to combine documentation files extracted by collate

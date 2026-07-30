@@ -269,7 +269,18 @@ def test_collate_with_media():
             config_path.write_text(dump(RootModel[Config](config).model_dump_json()))
 
             copy_tree(str(data_dir), str(note_dir / '2025-02-24_2025-03-02'))
+            # An entry that embeds the screenshot must keep pointing at the
+            # organized copy after collation. Regression: the empty-section
+            # cleanup pass used to rewrite the entry from its in-memory tree
+            # and revert the updated media reference.
+            embed = note_dir / '2025-02-24_2025-03-02' / '2025-02-25.md'
+            embed.write_text('# 2025-02-25\n\n## Work Done\n\n- Fixed it ![shot](~/media_source/screenshot.png)\n')
+
             runner = CliRunner()
             result = runner.invoke(main, ['-c', str(config_path), 'collate',
                                          str(note_dir / '2025-02-24_2025-03-02')])
             assert result.exit_code == 0
+
+            embed_after = embed.read_text()
+            assert '![shot](./media/2025-02-26_12-00-00.png)' in embed_after
+            assert 'screenshot.png' not in embed_after

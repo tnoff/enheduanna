@@ -1,0 +1,1 @@
+Fixed `collate` reverting rewritten media references: the empty-section cleanup pass rewrote each entry from its in-memory tree after the media reference was updated on disk, leaving image links pointing at the pre-move source path (a broken link when the media was moved). The reference rewrite now runs after the cleanup.

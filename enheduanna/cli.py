@@ -104,16 +104,21 @@ def collate(context: click.Context, file_dir: str, title, collate_name: str):
         new_file = MarkdownFile(new_path, document)
         new_file.write()
         click.echo(f'Writing document to file {new_path}')
-    # Organize media files if configured
+    # Organize media files if configured. Move/copy the files now, but defer the
+    # in-note reference rewrite until after remove_empty_sections: that cleanup
+    # rewrites each entry from its in-memory section tree (which still holds the
+    # original reference) and would otherwise clobber the rewritten path.
     date_range = parse_collation_folder_name(file_dir.name, context.obj.file.date_output_format)
+    filename_mapping = {}
     if date_range:
         start_date, end_date = date_range
         filename_mapping = organize_media_for_collation(file_dir, start_date, end_date, context.obj.file.media)
-        if filename_mapping:
-            update_markdown_media_references(markdown_files, filename_mapping)
-    # Clean up files at the end
+    # Clean up files
     click.echo(f'Cleaning up files in dir {file_dir}')
     remove_empty_sections(markdown_files)
+    # Rewrite media references last, so the cleanup write above cannot revert them
+    if filename_mapping:
+        update_markdown_media_references(markdown_files, filename_mapping)
 
 @main.command('merge')
 @click.option('-t', '--title')
