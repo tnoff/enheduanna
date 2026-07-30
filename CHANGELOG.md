@@ -5,6 +5,12 @@ All notable changes to enheduanna will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-07-30
+
+### Changed
+
+- Fixed `collate` reverting rewritten media references: the empty-section cleanup pass rewrote each entry from its in-memory tree after the media reference was updated on disk, leaving image links pointing at the pre-move source path (a broken link when the media was moved). The reference rewrite now runs after the cleanup.
+
 ## [0.3.0] - 2026-07-10
 
 ### Added
