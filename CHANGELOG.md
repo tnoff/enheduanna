@@ -5,6 +5,12 @@ All notable changes to enheduanna will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-07-30
+
+### Changed
+
+- `collate` now adds a `Contents` table of contents to the top of each `summary.md` linking to the daily entry files and any collated media in the folder, and creates or refreshes a root index file (`index.md` by default) in the entries folder linking to every collation summary, newest first. Media organization runs before the summary is built so freshly collated media is listed. Configurable via the new `file.toc` config block (`enabled`, `summary_title`, `include_entries`, `include_media`, `root_index_enabled`, `root_index_name`, `root_index_title`); enabled by default.
+
 ## [0.3.1] - 2026-07-30
 
 ### Changed
