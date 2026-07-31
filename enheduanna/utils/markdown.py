@@ -6,6 +6,8 @@ from typing import List, Tuple
 from enheduanna.types.markdown.markdown_file import MarkdownFile
 from enheduanna.types.markdown.markdown_section import MarkdownSection
 from enheduanna.types.markdown.collate_section import CollateSection
+from enheduanna.types.markdown.document_section import DocumentSection
+from enheduanna.utils.files import normalize_file_name
 from enheduanna.utils.links import rewrite_section_links
 
 def section_generate_from_json(data_input: List[dict]) -> List[MarkdownSection]:
@@ -77,12 +79,14 @@ def _gather_all_section_data(markdown_file: MarkdownFile, parent_section: Markdo
         # Pass the (already-trimmed) source root so anchors to headings that stayed behind
         # become cross-file links.
         rewrite_section_links(new_root, markdown_file.file_path, document_folder, markdown_file.root_section)
-        document_list.append(new_root)
+        # Keep the un-prefixed title alongside the dated root so the writer can match an
+        # existing aggregator file (e.g. "Greg Weekly.md") named after the base section.
+        document_list.append(DocumentSection(base_title=title, root=new_root))
 
     return True
 
 def generate_markdown_collation(markdown_files: List[MarkdownFile], collate_sections: List[CollateSection],
-                             ignore_sections: List[str], document_folder: Path) -> Tuple[List[MarkdownSection], List[MarkdownSection]]:
+                             ignore_sections: List[str], document_folder: Path) -> Tuple[List[MarkdownSection], List[DocumentSection]]:
     '''
     Combine markdown sections by the collate titles
 
@@ -91,7 +95,7 @@ def generate_markdown_collation(markdown_files: List[MarkdownFile], collate_sect
     ignore_sections: Ignore sections when making new documents
     document_folder: Destination folder for extracted document sections
 
-    returns tupe of [List of combined sections] [List of document sections]
+    returns tupe of [List of combined sections] [List of DocumentSections]
     '''
     section_mapping = {}
     document_list = []
@@ -103,6 +107,39 @@ def generate_markdown_collation(markdown_files: List[MarkdownFile], collate_sect
         section.group_contents(values['collate'])
         new_sections.append(section)
     return new_sections, document_list
+
+def write_document_section(document: DocumentSection, document_folder: Path) -> Tuple[Path, bool]:
+    '''
+    Write an extracted document section to the document folder
+
+    If an aggregator file named "<base_title>.md" already exists in the folder, the dated
+    section is appended to the bottom of it as a new sub-section. Otherwise a standalone
+    "<date> <base_title>.md" file is written (the original behaviour).
+
+    document : DocumentSection to write
+    document_folder : Destination folder for documents
+
+    returns tuple of (written path, whether it was appended to an existing aggregator)
+    '''
+    aggregate_path = document_folder / f'{normalize_file_name(document.base_title)}.md'
+    if aggregate_path.exists():
+        # An empty aggregator file (e.g. freshly `touch`ed) has no title to parse, so seed a
+        # root titled after the base section instead of parsing it into a section-less root.
+        if aggregate_path.read_text().strip():
+            markdown_file = MarkdownFile.from_file(aggregate_path)
+        else:
+            markdown_file = MarkdownFile(aggregate_path, MarkdownSection(document.base_title, ''))
+        section = document.root
+        section.level = markdown_file.root_section.level + 1
+        section.set_section_levels(section.level + 1)
+        # Append directly rather than via add_section: re-running collate can legitimately add
+        # a second section with the same "<date> <base_title>" title, which add_section rejects.
+        markdown_file.root_section.sections.append(section)
+        markdown_file.write()
+        return aggregate_path, True
+    standalone_path = document_folder / f'{normalize_file_name(document.root.title)}.md'
+    MarkdownFile(standalone_path, document.root).write()
+    return standalone_path, False
 
 def __remove_empty(markdown_file: MarkdownFile, parent_section: MarkdownSection) -> bool:
     remove_sections = []

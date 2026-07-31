@@ -9,9 +9,9 @@ from enheduanna.types.markdown.markdown_file import MarkdownFile
 from enheduanna.types.markdown.markdown_section import MarkdownSection
 
 from enheduanna.utils.collation import create_parent_folder
-from enheduanna.utils.files import list_markdown_files, find_last_markdown_file, normalize_file_name
+from enheduanna.utils.files import list_markdown_files, find_last_markdown_file
 from enheduanna.utils.links import rewrite_section_links
-from enheduanna.utils.markdown import generate_markdown_collation, generate_markdown_merge, remove_empty_sections
+from enheduanna.utils.markdown import generate_markdown_collation, generate_markdown_merge, remove_empty_sections, write_document_section
 from enheduanna.utils.media import organize_media_for_collation, update_markdown_media_references, parse_collation_folder_name
 from enheduanna.utils.toc import build_summary_toc_section, update_root_index
 
@@ -115,10 +115,9 @@ def collate(context: click.Context, file_dir: str, title, collate_name: str):
     new_path.write_text(new_document.write())
     click.echo(f'Collation data written to file {new_path}')
     for document in documents:
-        new_path = context.obj.file.document_folder / f'{normalize_file_name(document.title)}.md'
-        new_file = MarkdownFile(new_path, document)
-        new_file.write()
-        click.echo(f'Writing document to file {new_path}')
+        new_path, appended = write_document_section(document, context.obj.file.document_folder)
+        verb = 'Appending' if appended else 'Writing'
+        click.echo(f'{verb} document to file {new_path}')
     # Update the root index that links to each collation summary
     if context.obj.file.toc.enabled and context.obj.file.toc.root_index_enabled:
         index_path = update_root_index(context.obj.file.entries_folder, collate_name, context.obj.file.toc)

@@ -236,6 +236,30 @@ sudo reboot
 
 The contents of the section that was moved will also be removed from the original notes file, in this case `2025-01-20.md`.
 
+#### Aggregating recurring sections into one file
+
+For sections that recur — a weekly 1:1, a standing meeting — you can collect every occurrence into a single file instead of accumulating a new dated file each time. Create a file in the document folder named exactly after the section (without any date), for example `Greg Weekly.md`:
+
+```
+# Greg Weekly
+
+Running log of the Greg 1:1
+```
+
+Once that aggregator file exists, `collate` no longer writes a standalone `<date> Greg Weekly.md`. Instead it appends the extracted section to the bottom of the aggregator as a new `## <date> Greg Weekly` sub-section, where `<date>` is the source entry's date. After collating an entry dated `2025-01-20`, `Greg Weekly.md` becomes:
+
+```
+# Greg Weekly
+
+Running log of the Greg 1:1
+
+## 2025-01-20 Greg Weekly
+
+- discussed the release plan
+```
+
+The match is on the exact section title, and the behaviour is opt-in per section: sections with no matching aggregator file keep producing standalone dated files as above. Re-running `collate` over an entry that still contains the section appends another sub-section (duplicates are kept, not merged).
+
 ### Relative Link Handling
 
 Whenever a section is moved to a file in a different folder — extracted into a document, merged into a combined file, or rolled over into a new week's entry — its Markdown file links (`[text](./path)` and `![alt](./path)`) are adjusted so they still resolve to the same file from the new location:

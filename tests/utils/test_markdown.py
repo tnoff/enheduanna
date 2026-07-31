@@ -7,11 +7,13 @@ from pytest import raises
 from enheduanna.types.markdown.markdown_file import MarkdownFile
 from enheduanna.types.markdown.markdown_section import MarkdownSection
 from enheduanna.types.markdown.collate_section import CollateSection
+from enheduanna.types.markdown.document_section import DocumentSection
 from enheduanna.utils.markdown import section_generate_from_json
 from enheduanna.utils.markdown import collate_section_generate_from_json
 from enheduanna.utils.markdown import generate_markdown_collation
 from enheduanna.utils.markdown import generate_markdown_merge
 from enheduanna.utils.markdown import remove_empty_sections
+from enheduanna.utils.markdown import write_document_section
 
 
 def test_validation_of_section_schema():
@@ -65,13 +67,15 @@ def test_combine_markdown_sections():
         assert result[0].sections[0].title == 'Easy Work'
         assert result[0].sections[0].contents == '- Work on ticket (ABC-1234)\n\n-Work on another ticket (XYZ-1234)'
 
-        assert document[0].title == '2025-02-10 Steps to Reboot Servers'
-        assert document[0].contents == 'dummy data'
-        assert document[0].level == 1
+        assert document[0].base_title == 'Steps to Reboot Servers'
+        assert document[0].root.title == '2025-02-10 Steps to Reboot Servers'
+        assert document[0].root.contents == 'dummy data'
+        assert document[0].root.level == 1
 
-        assert document[1].title == '2025-02-10 Notes From 1 on 1 with Cyrus'
-        assert document[1].contents == 'dummy data'
-        assert document[1].level == 1
+        assert document[1].base_title == 'Notes From 1 on 1 with Cyrus'
+        assert document[1].root.title == '2025-02-10 Notes From 1 on 1 with Cyrus'
+        assert document[1].root.contents == 'dummy data'
+        assert document[1].root.level == 1
 
         assert len(ms1.sections) == 2
         assert path1.read_text() == '# 2025-02-10\n\n## Work Done\n\n- Some example ticket work (ABC-1234)\nRandom input\n\n## Follow Ups\n\n- Some example followup\n'
@@ -155,6 +159,52 @@ def test_combine_markdown_sections_recursive():
         result, _ = generate_markdown_collation([mf], [cs], [], Path(tmpdir) / 'documents')
         assert len(result) == 1
         assert result[0].title == 'Work Done'
+
+def _document_section(base_title='Greg Weekly', date_prefix='2025-02-28'):
+    root = MarkdownSection(f'{date_prefix} {base_title}', '', level=1)
+    root.add_section(MarkdownSection('Details', 'some notes from the meeting', level=2))
+    return DocumentSection(base_title=base_title, root=root)
+
+def test_write_document_section_standalone():
+    # No aggregator file present -> standalone dated file, original behaviour
+    with TemporaryDirectory() as tmpdir:
+        document_folder = Path(tmpdir)
+        path, appended = write_document_section(_document_section(), document_folder)
+        assert appended is False
+        assert path == document_folder / '2025-02-28 Greg Weekly.md'
+        assert path.read_text() == '# 2025-02-28 Greg Weekly\n\n## Details\n\nsome notes from the meeting\n'
+
+def test_write_document_section_appends_to_existing():
+    # An aggregator named after the base title exists -> append a dated sub-section
+    with TemporaryDirectory() as tmpdir:
+        document_folder = Path(tmpdir)
+        aggregate_path = document_folder / 'Greg Weekly.md'
+        aggregate_path.write_text('# Greg Weekly\n\nRunning notes for the weekly sync\n')
+
+        path, appended = write_document_section(_document_section(), document_folder)
+        assert appended is True
+        assert path == aggregate_path
+        content = path.read_text()
+        assert content == ('# Greg Weekly\n\nRunning notes for the weekly sync\n\n'
+                           '## 2025-02-28 Greg Weekly\n\n### Details\n\nsome notes from the meeting\n')
+        # No standalone dated file was created
+        assert not (document_folder / '2025-02-28 Greg Weekly.md').exists()
+
+        # Re-running appends a second same-titled section (no dedup guard)
+        write_document_section(_document_section(), document_folder)
+        assert path.read_text().count('## 2025-02-28 Greg Weekly') == 2
+
+def test_write_document_section_appends_to_empty_aggregator():
+    # An empty aggregator (freshly touched) is seeded with a title from the base section
+    with TemporaryDirectory() as tmpdir:
+        document_folder = Path(tmpdir)
+        aggregate_path = document_folder / 'Greg Weekly.md'
+        aggregate_path.write_text('')
+
+        path, appended = write_document_section(_document_section(), document_folder)
+        assert appended is True
+        assert path == aggregate_path
+        assert path.read_text() == '# Greg Weekly\n\n## 2025-02-28 Greg Weekly\n\n### Details\n\nsome notes from the meeting\n'
 
 def test_remove_sections():
     m = MarkdownSection('2025-03-01', '', level=1)

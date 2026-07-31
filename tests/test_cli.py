@@ -90,6 +90,32 @@ def test_collate():
         assert scratch_file.read_text() == '# 2025-02-27\n\n## Work Done\n\n- Writing up customer support (ABC-1234)\n\n## Meetings\n\n| Time | Summary |\n| ---- | ------- |\n| 0900 -> 1000 | Standup |\n| 1300 -> 1500 | Sync w/ Boss |\n'
 
 @freeze_time('2025-03-01 12:00:00', tz_offset=0)
+def test_collate_appends_to_existing_document():
+    # A pre-existing aggregator file in the document folder makes collate fold the matching
+    # extracted section into it as a dated sub-section instead of creating a new dated file.
+    data_dir = DATA_PATH / '2025-02-24_2025-03-02'
+    with temp_config() as (config_file, config):
+        copy_tree(data_dir, config.file.entries_folder / '2025-02-24_2025-03-02')
+        aggregate_path = config.file.document_folder / 'How to Answer Question.md'
+        aggregate_path.write_text('# How to Answer Question\n\nRolling collection of question answers\n')
+
+        runner = CliRunner()
+        result = runner.invoke(main, ['-c', config_file, 'collate',
+                                     str(config.file.entries_folder / '2025-02-24_2025-03-02')])
+        assert result.exit_code == 0
+        assert f'Appending document to file {aggregate_path}' in result.output
+        # The other, non-matching document is still written as its own dated file
+        assert f'Writing document to file {config.file.document_folder}/2025-02-27 Another Specific Question.md' in result.output
+
+        # No standalone dated file was created for the aggregated document
+        assert not (config.file.document_folder / '2025-02-27 How to Answer Question.md').exists()
+
+        content = aggregate_path.read_text()
+        assert content.startswith('# How to Answer Question\n\nRolling collection of question answers\n')
+        assert '## 2025-02-27 How to Answer Question' in content
+        assert 'How to answer a specific question Sansa asked' in content
+
+@freeze_time('2025-03-01 12:00:00', tz_offset=0)
 def test_merge():
     # Simulate documentation files that were extracted from previous collate operations
     with temp_config() as (config_file, config):
