@@ -5,6 +5,12 @@ All notable changes to enheduanna will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-07-31
+
+### Changed
+
+- - `collate` can now aggregate a recurring document section into a single file instead of writing a new dated file each run. When the document folder already contains a file named exactly after the section (e.g. `Greg Weekly.md`), the extracted section is appended to the bottom of it as a new `## <date> <section title>` sub-section, where `<date>` is the source entry's date. Sections with no matching aggregator file keep producing standalone `<date> <section title>.md` files as before; the behaviour is opt-in per section by creating the aggregator file.
+
 ## [0.4.0] - 2026-07-30
 
 ### Changed
