@@ -21,11 +21,11 @@ permissions:
 jobs:
   secrets:
     name: Scan for secrets
-    uses: tnoff/github-workflows/.github/workflows/trufflehog.yml@8570bac7529b60e79b4fc6c837027d2f65fc0c9f
+    uses: tnoff/github-workflows/.github/workflows/trufflehog.yml@badea054ae56c6ca72252cd22dab3a9f9b65268f
 
   spellcheck:
     name: Spellcheck
-    uses: tnoff/github-workflows/.github/workflows/spellcheck.yml@8570bac7529b60e79b4fc6c837027d2f65fc0c9f
+    uses: tnoff/github-workflows/.github/workflows/spellcheck.yml@badea054ae56c6ca72252cd22dab3a9f9b65268f
     with:
       name: Markdown
 
@@ -34,7 +34,7 @@ jobs:
   # depends on click, pathlib, pyaml_env and pydantic -- all pure Python.
   tox:
     name: Tox
-    uses: tnoff/github-workflows/.github/workflows/tox.yml@8570bac7529b60e79b4fc6c837027d2f65fc0c9f
+    uses: tnoff/github-workflows/.github/workflows/tox.yml@badea054ae56c6ca72252cd22dab3a9f9b65268f
 
   # Reimplements .image-build-rules' `changes:` block. This repo's Dockerfile
   # uses `COPY . .`, so strictly every file lands in the image layer; the list
@@ -88,7 +88,7 @@ jobs:
     name: Build and scan image
     needs: changes
     if: needs.changes.outputs.image == 'true'
-    uses: tnoff/github-workflows/.github/workflows/docker-build-check.yml@8570bac7529b60e79b4fc6c837027d2f65fc0c9f
+    uses: tnoff/github-workflows/.github/workflows/docker-build-check.yml@badea054ae56c6ca72252cd22dab3a9f9b65268f
 
   bump-version:
     name: Bump version
@@ -98,11 +98,11 @@ jobs:
     if: startsWith(github.head_ref, 'renovate/dev-')
     permissions:
       contents: write
-    uses: tnoff/github-workflows/.github/workflows/bump-version.yml@8570bac7529b60e79b4fc6c837027d2f65fc0c9f
+    uses: tnoff/github-workflows/.github/workflows/bump-version.yml@badea054ae56c6ca72252cd22dab3a9f9b65268f
     with:
       bump_changelog: true
     secrets:
-      app_id: ${{ secrets.CI_APP_ID }}
+      app_client_id: ${{ secrets.CI_APP_CLIENT_ID }}
       app_private_key: ${{ secrets.CI_APP_PRIVATE_KEY }}
 
   result:
