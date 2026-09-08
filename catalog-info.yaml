@@ -18,6 +18,6 @@ metadata:
     sub-folders, collates them into summaries, and promotes recurring notes into
     standalone documentation. Pip-installable, run locally.
 spec:
-  type: tool
+  type: library
   owner: group:default/admin
   lifecycle: production
