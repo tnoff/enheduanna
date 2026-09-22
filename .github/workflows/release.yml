@@ -30,7 +30,7 @@ jobs:
     name: Assemble changelog
     permissions:
       contents: write
-    uses: tnoff/github-workflows/.github/workflows/assemble-changelog.yml@a56f0254df895235b90c5246e8eec462713112fd
+    uses: tnoff/github-workflows/.github/workflows/assemble-changelog.yml@387bcb8774f6d5c75d7e9ea35003ed1f35ebf7a4
     secrets:
       app_client_id: ${{ secrets.CI_APP_CLIENT_ID }}
       app_private_key: ${{ secrets.CI_APP_PRIVATE_KEY }}
@@ -40,7 +40,7 @@ jobs:
     needs: assemble-changelog
     permissions:
       contents: write
-    uses: tnoff/github-workflows/.github/workflows/tag.yml@a56f0254df895235b90c5246e8eec462713112fd
+    uses: tnoff/github-workflows/.github/workflows/tag.yml@387bcb8774f6d5c75d7e9ea35003ed1f35ebf7a4
     with:
       gate_on_fragments: true
     secrets:
@@ -52,7 +52,7 @@ jobs:
     needs: tag
     permissions:
       contents: write
-    uses: tnoff/github-workflows/.github/workflows/release.yml@a56f0254df895235b90c5246e8eec462713112fd
+    uses: tnoff/github-workflows/.github/workflows/release.yml@387bcb8774f6d5c75d7e9ea35003ed1f35ebf7a4
     with:
       version: ${{ needs.tag.outputs.version }}
       tag_created: ${{ needs.tag.outputs.tag_created }}

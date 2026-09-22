@@ -69,13 +69,13 @@ jobs:
     name: Scan for secrets
     needs: metadata
     if: needs.metadata.outputs.only != 'true'
-    uses: tnoff/github-workflows/.github/workflows/trufflehog.yml@a56f0254df895235b90c5246e8eec462713112fd
+    uses: tnoff/github-workflows/.github/workflows/trufflehog.yml@387bcb8774f6d5c75d7e9ea35003ed1f35ebf7a4
 
   spellcheck:
     name: Spellcheck
     needs: metadata
     if: needs.metadata.outputs.only != 'true'
-    uses: tnoff/github-workflows/.github/workflows/spellcheck.yml@a56f0254df895235b90c5246e8eec462713112fd
+    uses: tnoff/github-workflows/.github/workflows/spellcheck.yml@387bcb8774f6d5c75d7e9ea35003ed1f35ebf7a4
     with:
       name: Markdown
 
@@ -86,7 +86,7 @@ jobs:
     name: Tox
     needs: metadata
     if: needs.metadata.outputs.only != 'true'
-    uses: tnoff/github-workflows/.github/workflows/tox.yml@a56f0254df895235b90c5246e8eec462713112fd
+    uses: tnoff/github-workflows/.github/workflows/tox.yml@387bcb8774f6d5c75d7e9ea35003ed1f35ebf7a4
 
   # Reimplements .image-build-rules' `changes:` block. This repo's Dockerfile
   # uses `COPY . .`, so strictly every file lands in the image layer; the list
@@ -142,7 +142,7 @@ jobs:
     name: Build and scan image
     needs: changes
     if: needs.changes.outputs.image == 'true'
-    uses: tnoff/github-workflows/.github/workflows/docker-build-check.yml@a56f0254df895235b90c5246e8eec462713112fd
+    uses: tnoff/github-workflows/.github/workflows/docker-build-check.yml@387bcb8774f6d5c75d7e9ea35003ed1f35ebf7a4
 
   bump-version:
     name: Bump version
@@ -152,7 +152,7 @@ jobs:
     if: startsWith(github.head_ref, 'renovate/dev-')
     permissions:
       contents: write
-    uses: tnoff/github-workflows/.github/workflows/bump-version.yml@a56f0254df895235b90c5246e8eec462713112fd
+    uses: tnoff/github-workflows/.github/workflows/bump-version.yml@387bcb8774f6d5c75d7e9ea35003ed1f35ebf7a4
     with:
       bump_changelog: true
     secrets:
@@ -168,7 +168,7 @@ jobs:
     name: Workflow contracts
     needs: metadata
     if: needs.metadata.outputs.only != 'true'
-    uses: tnoff/github-workflows/.github/workflows/check-workflow-contracts.yml@a56f0254df895235b90c5246e8eec462713112fd
+    uses: tnoff/github-workflows/.github/workflows/check-workflow-contracts.yml@387bcb8774f6d5c75d7e9ea35003ed1f35ebf7a4
 
   result:
     name: CI result
