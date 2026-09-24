@@ -1,0 +1,11 @@
+site_name: 'enheduanna'
+site_description: 'Command-line tool for keeping Markdown work notes: dated entries, collation into summaries, and promoting recurring notes into standalone documentation'
+
+nav:
+  - Home: README.md
+  - Development: DEVELOPMENT.md
+  - Agents/Conventions: AGENTS.md
+  - Contributing: CONTRIBUTING.md
+
+plugins:
+  - techdocs-core

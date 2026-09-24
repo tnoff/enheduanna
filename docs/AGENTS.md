@@ -1,7 +1,7 @@
 # AGENTS.md
 
 Guidance for AI coding agents working in this repository. For end-user
-CLI usage and configuration see [README.md](README.md); for setup,
+CLI usage and configuration see [README.md](../README.md); for setup,
 tests, and linting see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## Architecture
@@ -14,7 +14,7 @@ The codebase uses Pydantic dataclasses for type safety and validation:
 
 - **MarkdownSection** (`enheduanna/types/markdown/markdown_section.py`): Represents a section in a markdown file with title, contents, level (heading depth), and optional subsections. Forms a tree structure for nested sections.
 
-- **CollateSection** (`enheduanna/types/markdown/collate_section.py`): Extends MarkdownSection with regex pattern matching and groupBy capabilities for combining similar content during collation (e.g., grouping by Jira ticket numbers).
+- **CollateSection** (`enheduanna/types/markdown/collate_section.py`): A standalone dataclass (title, level, regex, groupBy) consumed alongside `MarkdownSection` during collation -- it does not extend or subclass `MarkdownSection`. Carries the regex pattern matching and groupBy capabilities for combining similar content during collation (e.g., grouping by Jira ticket numbers).
 
 - **Config** (`enheduanna/types/config/`): Configuration loaded from YAML files using pyaml-env. Includes FileConfig for file paths and sections, and CollationType for weekly vs monthly collation.
 

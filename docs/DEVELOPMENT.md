@@ -1,7 +1,7 @@
 # Development
 
 Setup, tests, and linting for working in this repo. User-facing CLI
-usage and configuration live in [README.md](README.md). For agent-facing
+usage and configuration live in [README.md](../README.md). For agent-facing
 internals (type system, collation/merge flows) see [AGENTS.md](AGENTS.md).
 
 ## Setup
@@ -66,8 +66,9 @@ intentionally disabled there.
 docker build -t enheduanna .
 ```
 
-Used by CI to publish images via the shared
-`tnoff-projects/github-workflows` `buildkit-docker-push.yml` template.
+Checked (not published) in CI via the shared `tnoff/github-workflows`
+`docker-build-check.yml` template -- this repo builds and scans the
+image but never pushes it; there is no image job in `release.yml`.
 
 ## Releasing
 
