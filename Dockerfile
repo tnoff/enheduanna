@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir .
 RUN mkdir -p /notes /documents
 
 # Create a default config file that uses container paths
-RUN echo "---\nfile:\n  entries_directory: /notes\n  document_directory: /documents" > /root/.enheduanna.yml
+RUN echo "---\nfile:\n  entries_folder: /notes\n  document_folder: /documents" > /root/.enheduanna.yml
 
 # Set the default working directory to /notes
 WORKDIR /notes

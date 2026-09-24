@@ -336,7 +336,7 @@ Example config:
 ```
 ---
 file:
-  date_format: %Y-%m-%d
+  date_output_format: %Y-%m-%d
 ```
 
 ### Entries Folder
