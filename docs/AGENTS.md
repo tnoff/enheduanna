@@ -1,7 +1,7 @@
 # AGENTS.md
 
 Guidance for AI coding agents working in this repository. For end-user
-CLI usage and configuration see [README.md](../README.md); for setup,
+CLI usage and configuration see [README.md](README.md); for setup,
 tests, and linting see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## Architecture

@@ -1,7 +1,7 @@
 # Development
 
 Setup, tests, and linting for working in this repo. User-facing CLI
-usage and configuration live in [README.md](../README.md). For agent-facing
+usage and configuration live in [README.md](README.md). For agent-facing
 internals (type system, collation/merge flows) see [AGENTS.md](AGENTS.md).
 
 ## Setup
@@ -72,5 +72,7 @@ image but never pushes it; there is no image job in `release.yml`.
 
 ## Releasing
 
-`VERSION` at the repo root is the single source of truth. Bump it and
-push to `main` — CI tags the commit and runs the release pipeline.
+`VERSION` at the repo root is the single source of truth. Merging a
+bump to `main` runs `.github/workflows/release.yml`, which assembles the
+changelog, tags, and creates the GitHub release (shared workflows from
+`tnoff/github-workflows`). No image or package is published.
