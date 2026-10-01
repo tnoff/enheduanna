@@ -286,7 +286,7 @@ It also creates or refreshes a root index file (`index.md` by default) in your e
 - [2025-01-20 -> 2025-01-26](./2025-01-20_2025-01-26/summary.md)
 ```
 
-This is enabled by default. See the [Table of Contents](#table-of-contents-1) config options to customize or disable it.
+This is enabled by default. See the [Table of Contents Options](#table-of-contents-options) to customize or disable it.
 
 ## Merge
 
@@ -336,7 +336,7 @@ Example config:
 ```
 ---
 file:
-  date_output_format: %Y-%m-%d
+  date_output_format: "%Y-%m-%d"
 ```
 
 ### Entries Folder
@@ -495,7 +495,7 @@ file:
      - `![screenshot](./media/screenshots/2025-01-20_14-30-45.png)`
      - `![diagram](./media/downloads/2025-01-21_09-15-30.jpg)`
 
-### Table of Contents
+### Table of Contents Options
 
 Control the link tables that `collate` generates in `summary.md` and at the root of your entries folder. Enabled by default; set `enabled: false` to turn everything off.
 
