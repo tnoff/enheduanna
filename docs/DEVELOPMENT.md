@@ -17,7 +17,7 @@ pip install -e ".[test]"
 ## Tests
 
 Full suite (bandit + pylint + pytest with 100% coverage gate) across
-py312–py315:
+py313–py315:
 
 ```bash
 tox
@@ -26,7 +26,7 @@ tox
 Single Python version:
 
 ```bash
-tox -e py312
+tox -e py313
 ```
 
 Tests only:
