@@ -5,6 +5,12 @@ All notable changes to enheduanna will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.3] - 2026-10-20
+
+### Changed
+
+- Changed the container image to python 3.15 and tox to test Python 3.13-3.15 (3.11 and 3.12 dropped); the pydantic-core aarch64 wheel blocker is gone
+
 ## [0.5.2] - 2026-10-13
 
 ### Changed
