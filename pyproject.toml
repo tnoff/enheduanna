@@ -13,9 +13,6 @@ dependencies = [
     "click==8.5.0",
     "pathlib==1.0.1",
     "pyaml_env==1.2.2",
-    # TODO: python 3.15 image build (Dockerfile) fails on aarch64 because
-    # pydantic-core has no cp315 wheel yet (renovate PR #204). Once a pydantic
-    # bump pulls in a pydantic-core with 3.15 wheels, retry the python 3.15 bump.
     "pydantic==2.14.1",
 ]
 
