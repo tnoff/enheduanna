@@ -34,7 +34,7 @@ permissions:
 jobs:
   publish:
     name: Generate and publish
-    uses: tnoff/github-workflows/.github/workflows/techdocs-publish-oidc.yml@c22cf762c9ed60d4c47efc4aea9c5be036adfb0e  # techdocs-publish-oidc-v1.1.0
+    uses: tnoff/github-workflows/.github/workflows/techdocs-publish-oidc.yml@3fa6bb93ccbfdfa68814da0b7f50b9f0d3d6e707  # techdocs-publish-oidc-v1.1.1
     with:
       entity_ref: default/Component/enheduanna
       techdocs_bucket_name: backstage_techdocs
